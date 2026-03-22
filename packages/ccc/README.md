@@ -1,7 +1,7 @@
 # @proj-airi/ccc
 
-Create Character Card in a modular way.
+モジュール方式でキャラクターカードを作成します。
 
-## License
+## ライセンス
 
 [MIT](./LICENSE)

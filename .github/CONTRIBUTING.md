@@ -1,8 +1,8 @@
-# Start contributing to [Project AIRI](https://github.com/moeru-ai/airi)
+# [Project AIRI](https://github.com/moeru-ai/airi) へのコントリビューションを始めよう
 
-Hello! Thank you for your interest in contributing to this project. This guide will help you get started.
+こんにちは！このプロジェクトへのコントリビューションに興味を持っていただきありがとうございます。このガイドが始めるお手伝いをします。
 
-## Prerequisites
+## 前提条件
 
 - [Git](https://git-scm.com/downloads)
 - [Node.js 23+](https://nodejs.org/en/download/)
@@ -10,36 +10,36 @@ Hello! Thank you for your interest in contributing to this project. This guide w
 - [pnpm](https://pnpm.io/installation)
 
 <details>
-<summary>Windows setup</summary>
+<summary>Windows セットアップ</summary>
 
-0. Download [Visual Studio](https://visualstudio.microsoft.com/downloads/) and follow the instructions here: https://rust-lang.github.io/rustup/installation/windows-msvc.html#walkthrough-installing-visual-studio-2022
+0. [Visual Studio](https://visualstudio.microsoft.com/downloads/) をダウンロードし、こちらの手順に従ってください：https://rust-lang.github.io/rustup/installation/windows-msvc.html#walkthrough-installing-visual-studio-2022
 
-   > Make sure to install Windows SDK and C++ build tools when installing Visual Studio.
+   > Visual Studio のインストール時に Windows SDK と C++ ビルドツールを必ずインストールしてください。
 
-1. Open PowerShell
-2. Install [`scoop`](https://scoop.sh/)
+1. PowerShell を開く
+2. [`scoop`](https://scoop.sh/) をインストール
 
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
    ```
 
-3. Install `git`, Node.js, `rustup`, `msvc` through `scoop`
+3. `scoop` で `git`、Node.js、`rustup`、`msvc` をインストール
 
    ```powershell
    scoop install git nodejs rustup
 
-   # For Rust dependencies
-   # Not required if you are not going to develop on either crates or apps/tamagotchi
+   # Rust の依存関係用
+   # crates または apps/tamagotchi の開発をしない場合は不要
    scoop install main/rust-msvc
-   # Rust & Windows specific
+   # Rust & Windows 固有
    rustup toolchain install stable-x86_64-pc-windows-msvc
    rustup default stable-x86_64-pc-windows-msvc
    ```
 
    > https://stackoverflow.com/a/64121601
 
-4. Install `pnpm` through `corepack`
+4. `corepack` で `pnpm` をインストール
 
    ```powershell
    corepack enable
@@ -49,16 +49,16 @@ Hello! Thank you for your interest in contributing to this project. This guide w
 </details>
 
 <details>
-<summary>macOS setup</summary>
+<summary>macOS セットアップ</summary>
 
-0. Open Terminal (or iTerm2, Ghostty, Kitty, etc.)
-1. Install `git`, `node` through `brew`
+0. Terminal（または iTerm2、Ghostty、Kitty など）を開く
+1. `brew` で `git`、`node` をインストール
 
    ```shell
    brew install git node
    ```
 
-2. Install `pnpm` through `corepack`
+2. `corepack` で `pnpm` をインストール
 
    ```shell
    corepack enable
@@ -68,19 +68,19 @@ Hello! Thank you for your interest in contributing to this project. This guide w
 </details>
 
 <details>
-<summary>Linux setup</summary>
+<summary>Linux セットアップ</summary>
 
-0. Open terminal
-1. Follow [nodesource/distributions: NodeSource Node.js Binary Distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#table-of-contents) to install `node`
-2. Follow [Git](https://git-scm.com/downloads/linux) to install `git`
-3. Install `pnpm` through `corepack`
+0. ターミナルを開く
+1. [nodesource/distributions: NodeSource Node.js Binary Distributions](https://github.com/nodesource/distributions?tab=readme-ov-file#table-of-contents) に従って `node` をインストール
+2. [Git](https://git-scm.com/downloads/linux) に従って `git` をインストール
+3. `corepack` で `pnpm` をインストール
 
    ```shell
    corepack enable
    corepack prepare pnpm@latest --activate
    ```
 
-4. If you would love to help to develop the desktop version, you will need those dependencies:
+4. デスクトップ版の開発を手伝いたい場合、以下の依存関係が必要です：
 
    ```shell
    sudo apt install \
@@ -93,13 +93,13 @@ Hello! Thank you for your interest in contributing to this project. This guide w
 
 </details>
 
-## If you have already contributed to this project before
+## 以前にこのプロジェクトにコントリビューションしたことがある場合
 
 > [!WARNING]
 >
-> If you haven't cloned this repository, skip this section.
+> このリポジトリをクローンしていない場合は、このセクションをスキップしてください。
 
-Make sure your local repository is up to date with the upstream repository:
+ローカルリポジトリがアップストリームリポジトリと最新であることを確認してください：
 
 ```shell
 git fetch --all
@@ -107,60 +107,60 @@ git checkout main
 git pull upstream main --rebase
 ```
 
-If you have a working branch, to make your branch up to date with the upstream repository:
+作業ブランチがある場合、ブランチをアップストリームリポジトリと最新にするには：
 
 ```shell
 git checkout <your-branch-name>
 git rebase main
 ```
 
-## Fork this project
+## このプロジェクトをフォーク
 
-Click on the **Fork** button on the top right corner of the [moeru-ai/airi](https://github.com/moeru-ai/airi) page.
+[moeru-ai/airi](https://github.com/moeru-ai/airi) ページの右上にある **Fork** ボタンをクリックしてください。
 
-## Clone
+## クローン
 
 ```shell
 git clone https://github.com/<your-github-username>/airi.git
 cd airi
 ```
 
-## Create your working branch
+## 作業ブランチの作成
 
 ```shell
 git checkout -b <your-branch-name>
 ```
 
-## Install dependencies
+## 依存関係のインストール
 
 ```shell
 corepack enable
 pnpm install
 
-# For Rust dependencies
-# Not required if you are not going to develop on either crates or apps/tamagotchi
+# Rust の依存関係用
+# crates または apps/tamagotchi の開発をしない場合は不要
 cargo fetch
 ```
 
 > [!NOTE]
 >
-> We would recommend to install [@antfu/ni](https://github.com/antfu-collective/ni) to make your script simpler.
+> スクリプトを簡潔にするために [@antfu/ni](https://github.com/antfu-collective/ni) のインストールをおすすめします。
 >
 > ```shell
 > corepack enable
 > npm i -g @antfu/ni
 > ```
 >
-> Once installed, you can
+> インストール後は：
 >
-> - use `ni` for `pnpm install`, `npm install` and `yarn install`.
-> - use `nr` for `pnpm run`, `npm run` and `yarn run`.
+> - `ni` を `pnpm install`、`npm install`、`yarn install` の代わりに使えます。
+> - `nr` を `pnpm run`、`npm run`、`yarn run` の代わりに使えます。
 >
-> You don't need to care about the package manager, `ni` will help you choose the right one.
+> パッケージマネージャーを気にする必要はなく、`ni` が適切なものを選んでくれます。
 
-## Choose the application you want to develop on
+## 開発するアプリケーションを選択
 
-### Stage Tamagotchi (Desktop version)
+### Stage Tamagotchi（デスクトップ版）
 
 ```shell
 pnpm dev:tamagotchi
@@ -168,13 +168,13 @@ pnpm dev:tamagotchi
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr dev:tamagotchi
 > ```
 
-### Stage Web (Browser version for [airi.moeru.ai](https://airi.moeru.ai))
+### Stage Web（[airi.moeru.ai](https://airi.moeru.ai) のブラウザ版）
 
 ```shell
 pnpm dev
@@ -182,17 +182,17 @@ pnpm dev
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr dev
 > ```
 
-### UI Storyboard
+### UI ストーリーボード
 
-Browse the live UI component storyboard at [airi.moeru.ai/ui](https://airi.moeru.ai/ui/).
+ライブ UI コンポーネントストーリーボードを [airi.moeru.ai/ui](https://airi.moeru.ai/ui/) で閲覧できます。
 
-### Documentation site
+### ドキュメントサイト
 
 ```shell
 pnpm dev:docs
@@ -200,37 +200,37 @@ pnpm dev:docs
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr dev:docs
 > ```
 
-### Telegram bot integration
+### Telegram Bot 連携
 
-A Postgres database is required.
+Postgres データベースが必要です。
 
 ```shell
 cd services/telegram-bot
 docker compose up -d
 ```
 
-Configure `.env`
+`.env` を設定
 
 ```shell
 cp .env .env.local
 ```
 
-Edit the credentials in `.env.local`.
+`.env.local` の認証情報を編集してください。
 
-Migrate the database
+データベースのマイグレーション
 
 ```shell
 pnpm -F @proj-airi/telegram-bot db:generate
 pnpm -F @proj-airi/telegram-bot db:push
 ```
 
-Run the bot
+Bot を実行
 
 ```shell
 pnpm -F @proj-airi/telegram-bot start
@@ -238,27 +238,27 @@ pnpm -F @proj-airi/telegram-bot start
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr -F @proj-airi/telegram-bot dev
 > ```
 
-### Discord bot integration
+### Discord Bot 連携
 
 ```shell
 cd services/discord-bot
 ```
 
-Configure `.env`
+`.env` を設定
 
 ```shell
 cp .env .env.local
 ```
 
-Edit the credentials in `.env.local`.
+`.env.local` の認証情報を編集してください。
 
-Run the bot
+Bot を実行
 
 ```shell
 pnpm -F @proj-airi/discord-bot start
@@ -266,29 +266,29 @@ pnpm -F @proj-airi/discord-bot start
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr -F @proj-airi/discord-bot dev
 > ```
 
-### Minecraft agent
+### Minecraft エージェント
 
 ```shell
 cd services/minecraft
 ```
 
-Start a Minecraft client, export your world with desired port, and fill-in the port number in `.env.local`.
+Minecraft クライアントを起動し、希望するポートでワールドをエクスポートして、`.env.local` にポート番号を記入してください。
 
-Configure `.env`
+`.env` を設定
 
 ```shell
 cp .env .env.local
 ```
 
-Edit the credentials in `.env.local`.
+`.env.local` の認証情報を編集してください。
 
-Run the bot
+Bot を実行
 
 ```shell
 pnpm -F @proj-airi/minecraft-bot start
@@ -296,65 +296,65 @@ pnpm -F @proj-airi/minecraft-bot start
 
 > [!NOTE]
 >
-> For [@antfu/ni](https://github.com/antfu-collective/ni) users, you can
+> [@antfu/ni](https://github.com/antfu-collective/ni) ユーザーの場合：
 >
 > ```shell
 > nr -F @proj-airi/minecraft-bot dev
 > ```
 
-## Commit
+## コミット
 
-### Before commit
+### コミット前
 
-Please make sure lint (static checkers) and TypeScript compilers are satisfied:
+lint（静的チェッカー）と TypeScript コンパイラが満足していることを確認してください：
 
 ```shell
 pnpm lint && pnpm typecheck
 ```
 
-If you are committing images, consider using AVIF format instead of PNG, JPG etc. You can convert existing images to AVIF by running:
+画像をコミットする場合は、PNG、JPG などの代わりに AVIF フォーマットの使用を検討してください。既存の画像を AVIF に変換するには：
 
 ```shell
-pnpm to-avif <PATH_TO_IMAGE_OR_DIRECTORY1> <PATH_2> <PATH_3> ...
+pnpm to-avif <画像またはディレクトリのパス1> <パス2> <パス3> ...
 ```
 
 > [!NOTE]
 >
-> If you have [@antfu/ni](https://github.com/antfu-collective/ni) installed, you can use `nr` to run the commands:
+> [@antfu/ni](https://github.com/antfu-collective/ni) がインストールされている場合、`nr` でコマンドを実行できます：
 >
 > ```shell
 > nr lint && nr typecheck
 > ```
 
-### Commit
+### コミット
 
 ```shell
 git add .
-git commit -m "<your-commit-message>"
+git commit -m "<コミットメッセージ>"
 ```
 
-### Push to your fork repository
+### フォークリポジトリにプッシュ
 
 ```shell
 git push origin <your-branch-name> -u
 ```
 
-You should be able to browse the branch on your fork repository.
+フォークリポジトリでブランチを確認できるはずです。
 
 > [!NOTE]
 >
-> If this is your first time contributing to this project, you need to add the upstream repository too:
+> このプロジェクトに初めてコントリビューションする場合は、アップストリームリポジトリも追加する必要があります：
 >
 > ```shell
 > git remote add upstream https://github.com/moeru-ai/airi.git
 > ```
 
-## Creating Pull Request
+## プルリクエストの作成
 
-Navigate to [moeru-ai/airi](https://github.com/moeru-ai/airi) page, click on the **Pull requests** tab, and click on the **New pull request** button, click on the **Compare across forks** link, and select your fork repository.
+[moeru-ai/airi](https://github.com/moeru-ai/airi) ページに移動し、**Pull requests** タブをクリックし、**New pull request** ボタンをクリックし、**Compare across forks** リンクをクリックして、フォークリポジトリを選択してください。
 
-Review the changes, and click on the **Create pull request** button.
+変更を確認し、**Create pull request** ボタンをクリックしてください。
 
-## Whooo-ya! You made it!
+## やったー！完了です！
 
-Congratulations! You made your first contribution to this project. You can now wait for the maintainers to review your pull request.
+おめでとうございます！このプロジェクトへの最初のコントリビューションが完了しました。メンテナーがプルリクエストをレビューするのをお待ちください。

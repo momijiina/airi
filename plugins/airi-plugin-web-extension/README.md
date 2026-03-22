@@ -1,19 +1,19 @@
-# AIRI Plugin - Web Extension
+# AIRIプラグイン - Web拡張機能
 
-> Read what you are reading!
+> あなたが読んでいるものを読む！
 
-This is a plugin for the AIRI to understand what you are reading, looking at, or listening to on the web.
+AIRIがあなたがWeb上で読んでいるもの、見ているもの、聴いているものを理解するためのプラグインです。
 
-## What it does now
+## 現在の機能
 
-- Captures page + video context from YouTube and Bilibili.
-- Extracts subtitles from text tracks or DOM overlays.
-- Sends context updates and optional `spark:notify` events to the character.
-- Exposes a popup to configure WebSocket, toggles, and quick status.
+- YouTubeとBilibiliからページ+動画コンテキストを取得。
+- テキストトラックやDOMオーバーレイから字幕を抽出。
+- コンテキスト更新とオプションの `spark:notify` イベントをキャラクターに送信。
+- WebSocket、トグル、クイックステータスを設定するポップアップを提供。
 
-## Quick start
+## クイックスタート
 
 1. `pnpm -F @proj-airi/airi-plugin-web-extension dev`
-2. Load the unpacked extension from `.wxt/dev` in your browser.
-3. Open the popup to set the WebSocket URL (default: `ws://localhost:6121/ws`).
-4. Watch a YouTube/Bilibili video and confirm the popup shows the detected title/subtitle.
+2. ブラウザで `.wxt/dev` からアンパックされた拡張機能を読み込み。
+3. ポップアップを開いてWebSocket URLを設定（デフォルト: `ws://localhost:6121/ws`）。
+4. YouTube/Bilibiliの動画を再生し、ポップアップに検出されたタイトル/字幕が表示されることを確認。

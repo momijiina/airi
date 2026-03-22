@@ -1,54 +1,54 @@
-### **Prompt Architecture: Context-Injected Action Loop**
+### **プロンプトアーキテクチャ：コンテキスト注入型アクションループ**
 
-The bot implements a **"State-Aware Agentic Loop"** rather than a simple Chat-QA structure. The prompt is constructed dynamically at every tick of the loop.
+Bot は単純なチャット Q&A 構造ではなく、**「状態認識型エージェンティックループ」** を実装しています。プロンプトはループの各ティックで動的に構築されます。
 
-#### **1. Static Layer (System Definitions)**
+#### **1. 静的レイヤー（システム定義）**
 
-* **Source:** `src/core/planner/prompts/*.velin.md`
-* **Loader:** `src/core/planner/prompts/index.ts`
-* **Role:** Defines the "Soul" and "Rules".
-* **Components:**
-    * **Protocol Definition (`system-action-gen-v1`):** Hardcodes the JSON schema for available tools (`send_message`, `read_unread_messages`, `sleep`) and logic flow (e.g., "Must check unread messages after sending").
-    * **Persona (`personality-v1`):** Defines the character "AIRI" (tone, brevity, naturalness).
+* **ソース:** `src/core/planner/prompts/*.velin.md`
+* **ローダー:** `src/core/planner/prompts/index.ts`
+* **役割:** 「魂」と「ルール」を定義します。
+* **構成要素:**
+    * **プロトコル定義（`system-action-gen-v1`）:** 利用可能なツール（`send_message`、`read_unread_messages`、`sleep`）の JSON スキーマとロジックフロー（例：「送信後は未読メッセージを確認する必要がある」）をハードコードします。
+    * **ペルソナ（`personality-v1`）:** キャラクター「AIRI」を定義します（トーン、簡潔さ、自然さ）。
 
-#### **2. History Layer (Short-term Memory)**
+#### **2. 履歴レイヤー（短期記憶）**
 
-* **Source:** In-memory `messages` array (`ChatContext`).
-* **Role:** Provides conversational continuity.
-* **Mechanism:** A sliding window of the last ~20 messages (User/Assistant turns) is injected directly after the system prompt.
+* **ソース:** インメモリ `messages` 配列（`ChatContext`）。
+* **役割:** 会話の継続性を提供します。
+* **メカニズム:** 直近 ~20 メッセージのスライディングウィンドウ（ユーザー/アシスタントのターン）がシステムプロンプトの直後に注入されます。
 
-#### **3. Dynamic State Layer (Sensory Injection)**
+#### **3. 動的状態レイヤー（感覚注入）**
 
-* **Source:** `src/core/planner/llm-client.ts` (Runtime generated)
-* **Role:** Provides "Situational Awareness" and "Grounding".
-* **Mechanism:** A synthesized **User Message** is appended at the very end of the context window, forcing the LLM to focus on the immediate reality. It contains:
-    * **Incoming Stream**: Raw content of new messages arriving *now* (passed from `scheduler`).
-    * **Action History**: Results of the *immediately preceding* tool executions (e.g., "Action: send_message, Result: Success").
-    * **Environment**: Current server time.
-    * **Global State**: A summary of unread message counts across all channels (`unreadEvents`).
-    * **Trigger**: The final instruction: *"Based on the context... Respond with the action... in JSON only."*
+* **ソース:** `src/core/planner/llm-client.ts`（ランタイムで生成）
+* **役割:** 「状況認識」と「グラウンディング」を提供します。
+* **メカニズム:** 合成された **ユーザーメッセージ** がコンテキストウィンドウの最後に追加され、LLM に即座の現実に集中させます。含まれる内容：
+    * **受信ストリーム**: *現在* 到着中の新しいメッセージの生の内容（`scheduler` から渡される）。
+    * **アクション履歴**: *直前の* ツール実行結果（例：「アクション: send_message、結果: 成功」）。
+    * **環境**: 現在のサーバー時刻。
+    * **グローバル状態**: すべてのチャネルにわたる未読メッセージ数の要約（`unreadEvents`）。
+    * **トリガー**: 最終指示：*「コンテキストに基づいて... JSON のみでアクションを応答してください。」*
 
 ---
 
-### **Data Flow Summary**
+### **データフロー概要**
 
 ```mermaid
 graph TD
-    A[Static Markdown] -->|Velin Render| B(System Message)
-    C[Chat History] -->|Sliding Window| D(Context Body)
-    E[Runtime State] -->|Unread/Time/Results| F(State Injection)
+    A[静的 Markdown] -->|Velin レンダリング| B(システムメッセージ)
+    C[チャット履歴] -->|スライディングウィンドウ| D(コンテキスト本体)
+    E[ランタイム状態] -->|未読/時刻/結果| F(状態注入)
 
-    B --> G[Final Prompt]
+    B --> G[最終プロンプト]
     D --> G
     F --> G
 
-    G -->|LLM API| H{Decision}
-    H -->|JSON| I[Action Dispatcher]
+    G -->|LLM API| H{判断}
+    H -->|JSON| I[アクションディスパッチャー]
 
 ```
 
-### **Key Characteristics**
+### **主要な特徴**
 
-1. **JSON Enforcement**: The bot does not use native "Function Calling" APIs (like OpenAI Tools). It relies on **Prompt Engineering** to force the model to output raw JSON, which is then parsed by `best-effort-json-parser`.
-2. **Stateless Logic**: The prompt explicitly tells the LLM "You have X unread messages" in every turn, making the LLM the sole decision-maker for flow control (Reading vs. Replying vs. Sleeping).
-3. **Observation-Reflection**: The prompt includes `History actions`, allowing the LLM to "see" the result of its previous attempt (e.g., if a read action returned empty, it knows to stop).
+1. **JSON の強制**: Bot はネイティブの「Function Calling」API（OpenAI Tools など）を使用しません。**プロンプトエンジニアリング** でモデルに生の JSON を出力させ、`best-effort-json-parser` でパースします。
+2. **ステートレスロジック**: プロンプトは毎ターン LLM に「X 件の未読メッセージがあります」と明示的に伝え、フロー制御（読み取り vs 返信 vs スリープ）の唯一の意思決定者を LLM にします。
+3. **観察-振り返り**: プロンプトに `History actions` が含まれ、LLM が前回の試行結果を「見る」ことができます（例：読み取りアクションが空を返した場合、停止することを知ります）。

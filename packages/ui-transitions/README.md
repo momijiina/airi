@@ -1,11 +1,11 @@
 # @proj-airi/ui-transitions
 
 <p align="center">
-  [<a href="https://proj-airi-packages-ui-transitions.netlify.app/">Try it</a>]
+  [<a href="https://proj-airi-packages-ui-transitions.netlify.app/">試してみる</a>]
 </p>
 
-A set of UI transition animations for fade-in / fade-out of scenes.
+シーンのフェードイン/フェードアウト用UIトランジションアニメーションセット。
 
-## License
+## ライセンス
 
 [MIT](../../LICENSE)

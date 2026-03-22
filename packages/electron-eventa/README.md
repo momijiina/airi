@@ -1,8 +1,8 @@
 # @proj-airi/electron-eventa
 
-Shared Eventa contract definitions for Electron IPC across AIRI apps.
+AIRIアプリ全体で使用するElectron IPC用の共有Eventaコントラクト定義。
 
-## Exports
+## エクスポート
 
-- `@proj-airi/electron-eventa`: core Electron contracts (`electron`, `bounds`, `cursorScreenPoint`, etc.)
-- `@proj-airi/electron-eventa/electron-updater`: auto-updater contracts and state types
+- `@proj-airi/electron-eventa`: Electronのコアコントラクト（`electron`, `bounds`, `cursorScreenPoint` など）
+- `@proj-airi/electron-eventa/electron-updater`: 自動アップデーターのコントラクトと状態型

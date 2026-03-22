@@ -1,8 +1,8 @@
 # Stage UI
 
-Shared core for stage
+ステージの共有コア
 
-## Histoire (UI storyboard)
+## Histoire（UIストーリーボード）
 
 https://histoire.dev/
 
@@ -10,7 +10,7 @@ https://histoire.dev/
 pnpm -F @proj-airi/stage-ui run story:dev
 ```
 
-### Project structure
+### プロジェクト構成
 
-1. If a story is bound to a specific component, it can be placed beside the component in the `src` folder. e.g., `MyComponent.story.vue`
-2. If a story is not bound to a specific component, then it should be placed in the `stories` folder. e.g., `MyStory.story.vue`
+1. ストーリーが特定のコンポーネントに紐づく場合、`src` フォルダ内のコンポーネントの横に配置します。例: `MyComponent.story.vue`
+2. ストーリーが特定のコンポーネントに紐づかない場合、`stories` フォルダに配置します。例: `MyStory.story.vue`

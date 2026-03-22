@@ -1,11 +1,11 @@
 # @proj-airi/server-shared
 
-The shared type definitions for all server-side packages of Project AIRI.
+Project AIRIの全サーバーサイドパッケージ用の共有型定義。
 
-## Usage
+## 使い方
 
 ```shell
-ni @proj-airi/server-shared -D # from @antfu/ni, can be installed via `npm i -g @antfu/ni`
+ni @proj-airi/server-shared -D # @antfu/ni から。`npm i -g @antfu/ni` でインストール可能
 pnpm i @proj-airi/server-shared -D
 yarn i @proj-airi/server-shared -D
 npm i @proj-airi/server-shared -D
@@ -15,47 +15,47 @@ npm i @proj-airi/server-shared -D
 import type { WebSocketEvents } from '@proj-airi/server-shared'
 ```
 
-## How to use the events in distributed use cases?
+## 分散ユースケースでのイベント使用方法
 
-### Scenarios
+### シナリオ
 
-#### Minecraft agent
+#### Minecraftエージェント
 
-##### 1. Urgent combat (witch attack)
+##### 1. 緊急戦闘（ウィッチの襲撃）
 
-- Minecraft sends `spark:notify` (kind=alarm, urgency=immediate, payload hp/location/gear, destinations=["character"]).
-- Character `spark:emit` working ("Seen it").
-- Character issues `spark:command` with interrupt=force and options (retreat vs push).
-- Minecraft `spark:emit` working ("Pillared up; healing") then done/blocked as it executes.
-- Optional `context:update` for summary/memory.
+- Minecraftが `spark:notify`（kind=alarm, urgency=immediate, payload: HP/位置/装備, destinations=["character"]）を送信。
+- キャラクターが `spark:emit` working（"確認した"）。
+- キャラクターが interrupt=force と選択肢（撤退 vs 突撃）付きの `spark:command` を発行。
+- Minecraftが `spark:emit` working（"柱を立てて回復中"）、その後実行に応じてdone/blocked。
+- オプションで `context:update` による要約/メモリ。
 
-##### 2. Prep plan (Ender Dragon)
+##### 2. 準備計画（エンダードラゴン）
 
-- Discord/user intent triggers character `spark:command` to Minecraft (intent=plan, interrupt=soft, steps gather beds/pots/gear, fallback).
-- Optional `context:update` with tips (lane='game').
-- Minecraft streams `spark:emit` progress.
-- If ambushed, Minecraft raises new `spark:notify` (alarm/immediate) to preempt.
-- Character revises with another `spark:command`.
-- Completion via `spark:emit` done + summary note.
+- Discord/ユーザーの意図がキャラクターの `spark:command` をMinecraftにトリガー（intent=plan, interrupt=soft, ステップ: ベッド/ポーション/装備収集, フォールバック）。
+- オプションで `context:update`（lane='game'）でヒント。
+- Minecraftが `spark:emit` で進捗をストリーミング。
+- 待ち伏せに遭った場合、Minecraftが新しい `spark:notify`（alarm/immediate）を発行して割り込み。
+- キャラクターが別の `spark:command` で修正。
+- `spark:emit` done + 要約ノートで完了。
 
-##### 3. Routine nudge
+##### 3. 日常的なリマインダー
 
-- Minecraft signals low food via `spark:notify` (kind=reminder, urgency=soon, destinations=["character"]).
-- Character defers to next tick and sends `spark:command` (interrupt=soft, intent=plan: "gather food nearby").
-- Minecraft `spark:emit` queued/working then done.
+- Minecraftが食料不足を `spark:notify`（kind=reminder, urgency=soon, destinations=["character"]）で通知。
+- キャラクターが次のティックに延期し、`spark:command`（interrupt=soft, intent=plan: "近くで食料を集める"）を送信。
+- Minecraftが `spark:emit` queued/working の後 done。
 
-##### 4. Multi-step command while researching (plan + live control)
+##### 4. リサーチ中の複数ステップコマンド（計画 + ライブ制御）
 
 > [!NOTE]
-> Using `intent=plan` keeps the loop alive even with un-finalized ideas—similar to TODO scaffolding in coding agents—while richer guidance is still being researched.
+> `intent=plan` を使うことで、コーディングエージェントのTODOスキャフォールディングと同様に、アイデアが未確定でもループを継続できます。
 
-- Character receives a user goal (e.g., fortify base) and issues an initial `spark:command` to Minecraft (interrupt=soft, intent=plan, steps to gather materials) so the agent keeps working.
-- Character simultaneously performs memory/search/design tasks outside the game loop (wiki lookup, prior notes).
-- As insights arrive, character sends `context:update` (lane='game', hints/ideas) to enrich the sub-agent without preemption.
-- If an urgent event occurs during prep, Minecraft raises `spark:notify` (alarm) → character responds with a short `spark:emit` working and a `spark:command` (interrupt=force) to handle it (e.g., retreat, block up).
-- Once design is ready, character sends a refined `spark:command` (`intent=proposal` (or `action`), `interrupt=soft`) with structured options/steps/fallbacks.
-- Minecraft streams `spark:emit` progress; when complete, character summarizes via `spark:emit` or `context:update` for memory.
+- キャラクターがユーザー目標（例: 拠点強化）を受け取り、最初の `spark:command` をMinecraftに発行（interrupt=soft, intent=plan, ステップ: 素材収集）。
+- キャラクターが同時にゲームループ外でメモリ/検索/設計タスクを実行（wiki検索、過去のノート）。
+- 知見が得られたら、キャラクターが `context:update`（lane='game', ヒント/アイデア）でサブエージェントを強化。
+- 準備中に緊急イベントが発生した場合、Minecraftが `spark:notify`（alarm）を発行 → キャラクターが `spark:emit` working と `spark:command`（interrupt=force）で対応。
+- 設計が完了したら、キャラクターが洗練された `spark:command`（`intent=proposal`（または`action`）、`interrupt=soft`）を構造化されたオプション/ステップ/フォールバック付きで送信。
+- Minecraftが `spark:emit` で進捗をストリーミング。完了時、キャラクターが `spark:emit` または `context:update` でメモリに要約。
 
-## License
+## ライセンス
 
 [MIT](../../LICENSE)

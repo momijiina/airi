@@ -1,20 +1,20 @@
 # @proj-airi/vite-plugin-warpdrive
 
-Vite plugin that rewrites selected build assets (large WASM/TTF/VRM, etc.) to remote object storage and uploads them after build. It uses Vite's `renderBuiltUrl` hook so the generated bundles reference the remote URL while keeping the local file for upload.
+選択したビルドアセット（大きなWASM/TTF/VRMなど）をリモートオブジェクトストレージにリライトし、ビルド後にアップロードするViteプラグイン。Viteの `renderBuiltUrl` フックを使用して、生成されたバンドルがリモートURLを参照しつつ、ローカルファイルをアップロード用に保持します。
 
-## Why
+## なぜ必要か
 
-- Keep HTML/JS bundles lean while serving heavy assets (WASM, fonts, models) from object storage/CDN.
-- Simple provider abstraction; ships with an S3-compatible implementation via [`s3mini`](https://github.com/good-lly/s3mini).
-- Emits an optional manifest (`remote-assets.manifest.json`) that maps built filenames to remote URLs plus hostId/hostType for debugging.
+- HTML/JSバンドルを軽量に保ちながら、重いアセット（WASM、フォント、モデル）をオブジェクトストレージ/CDNから配信。
+- シンプルなプロバイダー抽象化。[`s3mini`](https://github.com/good-lly/s3mini) によるS3互換実装を同梱。
+- オプションのマニフェスト（`remote-assets.manifest.json`）を出力し、ビルドファイル名をリモートURL + hostId/hostTypeにマッピング。
 
-## Install
+## インストール
 
 ```bash
 pnpm add -D @proj-airi/vite-plugin-warpdrive
 ```
 
-## Usage
+## 使い方
 
 ```ts
 import { createS3Provider, WarpDrivePlugin } from '@proj-airi/vite-plugin-warpdrive'
@@ -45,20 +45,20 @@ export default defineConfig({
 })
 ```
 
-### Options
+### オプション
 
-- `provider` (required): object implementing `UploadProvider` (see below).
-- `prefix`: string path prefix for uploaded keys and URLs (default: `remote-assets`; e.g. `remote-assets/assets/foo.wasm`).
-- `include`: array of regex or predicate functions to decide which assets to rewrite/upload (empty array means nothing is rewritten).
-- `includeBy`: optional `(filename, ctx) => boolean` for finer control (`ctx` has `hostId`, `hostType`).
-- `contentTypeBy`: optional `(filename) => string | Promise<string | undefined> | undefined` resolver passed to `provider.upload`.
-- `manifest`: when true, emits `remote-assets.manifest.json` describing fileName/key/url/hostId/hostType/size.
-- `delete`: when true (default), delete uploaded local assets from disk after upload.
-- `clean`: when true (default), call `provider.cleanPrefix(prefix)` before uploading; skipped if no prefix or provider lacks `cleanPrefix`.
-- `skipNotModified`: when true (default), skip uploads if `provider.shouldSkipUpload` returns true.
-- `dryRun`: when true, rewrite URLs/emit manifest without cleaning or uploading.
+- `provider`（必須）: `UploadProvider` を実装するオブジェクト（下記参照）。
+- `prefix`: アップロードキーとURLのパスプレフィックス文字列（デフォルト: `remote-assets`。例: `remote-assets/assets/foo.wasm`）。
+- `include`: リライト/アップロード対象アセットを決定する正規表現または述語関数の配列（空配列は何もリライトしない）。
+- `includeBy`: オプションの `(filename, ctx) => boolean`（`ctx` に `hostId`、`hostType` あり）。
+- `contentTypeBy`: オプションの `(filename) => string | Promise<string | undefined> | undefined`。`provider.upload` に渡される。
+- `manifest`: trueの場合、fileName/key/url/hostId/hostType/sizeを記述する `remote-assets.manifest.json` を出力。
+- `delete`: true（デフォルト）の場合、アップロード後にローカルアセットをディスクから削除。
+- `clean`: true（デフォルト）の場合、アップロード前に `provider.cleanPrefix(prefix)` を呼び出し。プレフィックスがないかプロバイダーが `cleanPrefix` を持たない場合はスキップ。
+- `skipNotModified`: true（デフォルト）の場合、`provider.shouldSkipUpload` が true を返すとアップロードをスキップ。
+- `dryRun`: trueの場合、URLリライト/マニフェスト出力のみでクリーン/アップロードは行わない。
 
-#### UploadProvider interface
+#### UploadProvider インターフェース
 
 ```ts
 interface UploadProvider {
@@ -71,14 +71,14 @@ interface UploadProvider {
 
 ### createS3Provider
 
-Light wrapper around `s3mini`. Required fields:
+`s3mini` の軽量ラッパー。必須フィールド:
 
-- `endpoint`: full bucket URL (e.g. `https://s3.example.com/my-bucket`).
-- `accessKeyId`, `secretAccessKey`: credentials.
-- Optional: `region`, `requestSizeInBytes`, `requestAbortTimeout`, `publicBaseUrl` (override public URL base), `skipNotModified` (default: true; uses ETag/MD5 to skip uploads).
+- `endpoint`: バケットの完全URL（例: `https://s3.example.com/my-bucket`）。
+- `accessKeyId`、`secretAccessKey`: 認証情報。
+- オプション: `region`、`requestSizeInBytes`、`requestAbortTimeout`、`publicBaseUrl`（公開URLベースをオーバーライド）、`skipNotModified`（デフォルト: true。ETag/MD5でアップロードをスキップ）。
 
-## How it works
+## 動作の仕組み
 
-1. `renderBuiltUrl` returns the remote URL for matching assets while remembering the key/hostId/hostType.
-2. `generateBundle` records assets to upload, emits the optional manifest, and leaves the local files in `dist/`.
-3. `closeBundle` optionally cleans the prefix, skips unmodified uploads when supported, uploads assets, and deletes local copies (unless `delete` is false).
+1. `renderBuiltUrl` がマッチするアセットに対してリモートURLを返し、key/hostId/hostTypeを記憶。
+2. `generateBundle` がアップロード対象アセットを記録、オプションのマニフェストを出力し、ローカルファイルを `dist/` に残す。
+3. `closeBundle` がオプションでプレフィックスをクリーン、未変更アップロードをスキップ、アセットをアップロード、ローカルコピーを削除（`delete` が false でない場合）。

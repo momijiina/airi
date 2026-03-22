@@ -1,14 +1,14 @@
 # @proj-airi/cap-vite
 
-CLI for [Capacitor](https://capacitorjs.com/) live-reload development using Vite.
+[Capacitor](https://capacitorjs.com/) のViteを使用したライブリロード開発用CLI。
 
-## Usage
+## 使い方
 
 ```bash
 cap-vite [vite args...] -- <ios|android> [cap run args...]
 ```
 
-Examples:
+例:
 
 ```bash
 pnpm exec cap-vite -- ios --target <DEVICE_ID_OR_SIMULATOR_NAME>
@@ -17,17 +17,17 @@ CAPACITOR_DEVICE_ID=<DEVICE_ID_OR_SIMULATOR_NAME> pnpm exec cap-vite -- ios
 pnpm -F @proj-airi/stage-pocket run dev:ios -- --target <DEVICE_ID_OR_SIMULATOR_NAME>
 ```
 
-- Arguments before `--` are forwarded to `vite`.
-- Arguments after `--` are forwarded to `cap run`.
-- If `CAPACITOR_DEVICE_ID` is set and `cap run` args do not contain `--target`, `cap-vite` injects `--target <CAPACITOR_DEVICE_ID>` automatically.
-- `cap-vite` always launches the Vite dev server. Do not pass `vite dev` or `vite serve` as extra args.
-- After the dev server starts, press `R` in the terminal to re-run `cap run` without restarting Vite.
+- `--` の前の引数は `vite` に転送されます。
+- `--` の後の引数は `cap run` に転送されます。
+- `CAPACITOR_DEVICE_ID` が設定され、`cap run` の引数に `--target` が含まれていない場合、`cap-vite` が自動的に `--target <CAPACITOR_DEVICE_ID>` を挿入します。
+- `cap-vite` は常にVite開発サーバーを起動します。追加引数として `vite dev` や `vite serve` を渡さないでください。
+- 開発サーバー起動後、ターミナルで `R` を押すとViteを再起動せずに `cap run` を再実行できます。
 
-You can see the list of available devices and simulators by running `pnpm exec cap run ios --list` or `pnpm exec cap run android --list`.
+`pnpm exec cap run ios --list` または `pnpm exec cap run android --list` で利用可能なデバイスとシミュレータの一覧を確認できます。
 
-## Capacitor Configuration
+## Capacitor設定
 
-You need to set `server.url` in `capacitor.config.ts` to the env variable `CAPACITOR_DEV_SERVER_URL`, then the cli will handle rest for you.
+`capacitor.config.ts` の `server.url` を環境変数 `CAPACITOR_DEV_SERVER_URL` に設定する必要があります。残りはCLIが処理します。
 
 ```ts
 const serverURL = env.CAPACITOR_DEV_SERVER_URL
@@ -48,16 +48,16 @@ const config: CapacitorConfig = {
 export default config
 ```
 
-## Why we need this?
+## なぜ必要か？
 
-- No need to care what `server.url` should be, it will be automatically set to the correct value.
-- Rerun native app when native code changes, you won't forget to start it.
-- Rerun `cap run` on demand from the same terminal when you need a clean native relaunch.
-- No need to open two terminals to run the project, you can run it with one command.
+- `server.url` を気にする必要がなく、自動的に正しい値に設定されます。
+- ネイティブコード変更時にネイティブアプリを再実行。起動を忘れる心配がありません。
+- 同じターミナルからオンデマンドで `cap run` を再実行可能。クリーンなネイティブ再起動が必要な時に便利です。
+- 2つのターミナルを開く必要なく、1つのコマンドで実行できます。
 
-## Architecture Notes
+## アーキテクチャノート
 
-- Vite arguments are left to the real Vite CLI instead of being reimplemented inside `cap-vite`.
-- `cap-vite` injects a wrapper config so it can append its own Vite plugin without editing the user's existing `vite.config.*`.
-- The injected plugin reads `server.resolvedUrls`, starts `cap run`, and restarts it when files under the native platform directory change or when you press `R` in the terminal.
-- `cap-vite` only splits the two argument groups and passes the `cap run` arguments into the injected plugin through environment variables.
+- Vite引数は `cap-vite` 内で再実装せず、実際のVite CLIに委ねます。
+- `cap-vite` はユーザーの既存 `vite.config.*` を編集せずに独自のViteプラグインを追加できるよう、ラッパー設定をインジェクトします。
+- インジェクトされたプラグインは `server.resolvedUrls` を読み取り、`cap run` を起動し、ネイティブプラットフォームディレクトリのファイル変更時またはターミナルで `R` を押した時に再起動します。
+- `cap-vite` は2つの引数グループを分割し、`cap run` 引数を環境変数を通じてインジェクトされたプラグインに渡すだけです。

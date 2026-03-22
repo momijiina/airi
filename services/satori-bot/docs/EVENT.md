@@ -1,84 +1,84 @@
-### **JSON Field Documentation**
+### **JSON フィールドドキュメント**
 
-JSON Field Documentation of `SatoriEvent`
+`SatoriEvent` の JSON フィールドドキュメント
 
-* **Root Level**
+* **ルートレベル**
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `self_id` | String | The unique ID (QQ number) of the bot receiving the event. |
-| `platform` | String | The platform name (e.g., `onebot`). |
-| `timestamp` | Number | Unix timestamp (ms) when the event was created. |
-| `type` | String | The general event category (e.g., `message-created`). |
-| `subtype` | String | The sub-category of the event (e.g., `group`). |
-| `subsubtype` | String | Further classification (e.g., `group`). |
-| `id` | Integer | Internal sequence ID for the event processing. |
-| `sn` | Integer | Serial number for the event. |
+| `self_id` | String | イベントを受信する Bot のユニーク ID（QQ 番号）。 |
+| `platform` | String | プラットフォーム名（例：`onebot`）。 |
+| `timestamp` | Number | イベントが作成された Unix タイムスタンプ（ミリ秒）。 |
+| `type` | String | イベントの一般カテゴリ（例：`message-created`）。 |
+| `subtype` | String | イベントのサブカテゴリ（例：`group`）。 |
+| `subsubtype` | String | さらなる分類（例：`group`）。 |
+| `id` | Integer | イベント処理用の内部シーケンス ID。 |
+| `sn` | Integer | イベントのシリアルナンバー。 |
 
-* **Message Object**
+* **メッセージオブジェクト**
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `message` | Object | Container for standardized message details. |
-| `message.message_id` | String | Unique identifier for this specific message. |
-| `message.content` | String | The plain text content of the message. |
+| `message` | Object | 標準化されたメッセージ詳細のコンテナ。 |
+| `message.message_id` | String | この特定のメッセージのユニーク識別子。 |
+| `message.content` | String | メッセージのプレーンテキスト内容。 |
 
-* **User & Member**
+* **ユーザーとメンバー**
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `user` | Object | Standardized information about the message sender. |
-| `user.id` | String | Unique ID of the sender. |
-| `user.name` | String | Display name of the sender. |
-| `user.avatar` | String | URL to the sender's avatar image. |
-| `member` | Object | Context-specific member info (e.g., group membership). |
-| `member.nick` | String | The user's nickname/card in this specific group . |
-| `member.roles` | Array | List of roles assigned to the user (e.g., `member`). |
+| `user` | Object | メッセージ送信者の標準化された情報。 |
+| `user.id` | String | 送信者のユニーク ID。 |
+| `user.name` | String | 送信者の表示名。 |
+| `user.avatar` | String | 送信者のアバター画像の URL。 |
+| `member` | Object | コンテキスト固有のメンバー情報（例：グループメンバーシップ）。 |
+| `member.nick` | String | この特定のグループでのユーザーのニックネーム/カード。 |
+| `member.roles` | Array | ユーザーに割り当てられたロールのリスト（例：`member`）。 |
 
-* **Context (Guild/Group)**
+* **コンテキスト（ギルド/グループ）**
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `guild` | Object | Information about the guild/group. |
-| `guild.id` | String | Unique ID of the group/guild. |
-| `channel` | Object | Information about the channel (often same as guild in QQ groups). |
-| `channel.type` | Integer | Channel type classification. |
+| `guild` | Object | ギルド/グループの情報。 |
+| `guild.id` | String | グループ/ギルドのユニーク ID。 |
+| `channel` | Object | チャネルの情報（QQ グループではギルドと同じことが多い）。 |
+| `channel.type` | Integer | チャネルタイプの分類。 |
 
-* **Bot Instance (`login`)**
+* **Bot インスタンス（`login`）**
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `login` | Object | Information about the bot instance processing this event. |
-| `login.user` | Object | The bot's own user details (Name, Avatar, ID). |
-| `login.status` | Integer | Connection status (1 = Online). |
-| `login.features` | Array | List of supported API features (e.g., `message.create`). |
-| `login.adapter` | String | The adapter protocol being used (`onebot`). |
+| `login` | Object | このイベントを処理する Bot インスタンスの情報。 |
+| `login.user` | Object | Bot 自身のユーザー詳細（名前、アバター、ID）。 |
+| `login.status` | Integer | 接続ステータス（1 = オンライン）。 |
+| `login.features` | Array | サポートされている API 機能のリスト（例：`message.create`）。 |
+| `login.adapter` | String | 使用されているアダプタープロトコル（`onebot`）。 |
 
-### [Optional] raw data from adapter
+### [オプション] アダプターからの生データ
 
-e.g. onebot
+例：onebot
 
-* **OneBot Data (`_data`)** *Raw payload from the OneBot adapter*
+* **OneBot データ（`_data`）** *OneBot アダプターからの生ペイロード*
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `_data.message_type` | String | Type of message (e.g., `group`, `private`). |
-| `_data.sub_type` | String | Subtype (e.g., `normal`, `anonymous`). |
-| `_data.message_id` | Integer | Message ID as an integer (OneBot standard). |
-| `_data.real_id` | Integer | The real message ID from the protocol. |
-| `_data.sender` | Object | Sender details specific to OneBot format. |
-| `_data.sender.card` | String | The sender's group card/nickname. |
-| `_data.raw_message` | String | The unformatted raw string of the message. |
-| `_data.message` | Array | Array of message segments (Text, Image, Face, etc.). |
-| `_data.group_id` | Integer | The numeric ID of the group. |
-| `_data.group_name` | String | The name of the group. |
+| `_data.message_type` | String | メッセージの種類（例：`group`、`private`）。 |
+| `_data.sub_type` | String | サブタイプ（例：`normal`、`anonymous`）。 |
+| `_data.message_id` | Integer | 整数としてのメッセージ ID（OneBot 標準）。 |
+| `_data.real_id` | Integer | プロトコルからの実際のメッセージ ID。 |
+| `_data.sender` | Object | OneBot フォーマット固有の送信者詳細。 |
+| `_data.sender.card` | String | 送信者のグループカード/ニックネーム。 |
+| `_data.raw_message` | String | メッセージの未フォーマット生文字列。 |
+| `_data.message` | Array | メッセージセグメントの配列（テキスト、画像、顔文字など）。 |
+| `_data.group_id` | Integer | グループの数値 ID。 |
+| `_data.group_name` | String | グループの名前。 |
 
-* **Protocol Raw Data (`_data.raw`)** *Internal low-level protocol data (NTQQ/Lagrange)*
+* **プロトコル生データ（`_data.raw`）** *内部低レベルプロトコルデータ（NTQQ/Lagrange）*
 
-| Path | Type | Description |
+| パス | 型 | 説明 |
 | --- | --- | --- |
-| `_data.raw.msgId` | String | Protocol-level message ID. |
-| `_data.raw.msgSeq` | String | Message sequence number. |
-| `_data.raw.elements` | Array | Detailed rich media elements (text, faces, images). |
-| `_data.raw.senderUin` | String | Sender's User Internal Number (QQ). |
-| `_data.raw.peerUin` | String | Receiver/Group User Internal Number. |
+| `_data.raw.msgId` | String | プロトコルレベルのメッセージ ID。 |
+| `_data.raw.msgSeq` | String | メッセージシーケンス番号。 |
+| `_data.raw.elements` | Array | 詳細なリッチメディア要素（テキスト、顔文字、画像）。 |
+| `_data.raw.senderUin` | String | 送信者のユーザー内部番号（QQ）。 |
+| `_data.raw.peerUin` | String | 受信者/グループのユーザー内部番号。 |

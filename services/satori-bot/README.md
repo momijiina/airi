@@ -1,57 +1,57 @@
 # AIRI Satori Bot
 
-> **⚠️ Disclaimer**: This is a submodule of **AIRI**. The `core` part of this satori bot is merely a **temporary solution**. We will eventually delete it and integrate with **AIRI's Core** once the main framework is stable.
+> **⚠️ 免責事項**: これは **AIRI** のサブモジュールです。この Satori Bot の `core` 部分は単なる **暫定的な実装** です。メインフレームワークが安定したら、最終的にこれを削除し、**AIRI の Core** に統合する予定です。
 
-A **STANDALONE**, event-driven AI agent built on the [Satori Protocol](https://satori.chat/). It connects to multiple chat platforms (QQ, Telegram, Discord, Lark) via a Koishi bridge, featuring an autonomous thought loop.
+**スタンドアロン型**、イベント駆動の AI エージェントで、[Satori プロトコル](https://satori.chat/) 上に構築されています。Koishi ブリッジを介して複数のチャットプラットフォーム（QQ、Telegram、Discord、Lark）に接続し、自律的な思考ループを備えています。
 
-## 🏗 Architecture & Internals (Provisional)
+## 🏗 アーキテクチャと内部構造（暫定）
 
-**Important**: This module currently implements a self-contained "Mini-Core" (`src/core/`) to operate independently. This is **NOT** the final architecture of AIRI.
+**重要**: このモジュールは現在、独立して動作するための自己完結型「ミニコア」（`src/core/`）を実装しています。これは AIRI の **最終的なアーキテクチャではありません**。
 
-* **Temporary Logic**: The Event Loop, Scheduler, and Planner logic located in `src/core/` are placeholders. They simulate the behavior of the future AIRI Core.
-* **Retained Components**: The **Dispatcher** and **Database** will be retained. They will be exposed as **tool-like modules** to the AIRI Core for action execution and state persistence.
-* **Future Migration**: Once the main AIRI Core is ready, the `src/core/` directory (specifically the loop/planning logic) will be removed. This module will then be refactored to strictly function as an **Adapter** (Satori Protocol handling) and **Capability Provider** (Actions), delegating the cognitive loop to the main AIRI process.
+* **暫定的なロジック**: `src/core/` にあるイベントループ、スケジューラ、プランナーのロジックはプレースホルダーです。将来の AIRI Core の動作をシミュレートしています。
+* **保持されるコンポーネント**: **Dispatcher** と **Database** は保持されます。これらは AIRI Core に対して **ツールライクなモジュール** として公開され、アクション実行と状態永続化に使用されます。
+* **将来の移行**: メインの AIRI Core が準備できたら、`src/core/` ディレクトリ（特にループ/プランニングロジック）は削除されます。このモジュールは **アダプター**（Satori プロトコル処理）と **ケイパビリティプロバイダー**（アクション）として厳密にリファクタリングされ、認知ループはメインの AIRI プロセスに委譲されます。
 
-For the current standalone version, please refer to these documents:
+現在のスタンドアロン版については、以下のドキュメントを参照してください：
 
-* **[HANDLER.md](./docs/HANDLER.md)**: Explains the **current** Event-to-Action Flow (Queue -> Scheduler -> LLM).
-* **[PERSISTENCE.md](./docs/PERSISTENCE.md)**: Details the **current** Memory-First state management strategy specific to this temporary core.
+* **[HANDLER.md](./docs/HANDLER.md)**: **現在の** イベントからアクションへのフロー（キュー → スケジューラ → LLM）を説明しています。
+* **[PERSISTENCE.md](./docs/PERSISTENCE.md)**: この暫定コアに固有の **現在の** メモリファースト状態管理戦略の詳細です。
 
-**Key Code Paths:**
-* **Loop & Logic (Temporary)**: `src/core/`
-* **Adapter (Permanent)**: `src/adapter/satori/`
-* **Capabilities (Permanent)**: `src/capabilities/`
+**主要なコードパス：**
+* **ループとロジック（暫定）**: `src/core/`
+* **アダプター（永続）**: `src/adapter/satori/`
+* **ケイパビリティ（永続）**: `src/capabilities/`
 
-## Prerequisites
+## 前提条件
 
 * **Node.js** >= 18.0.0
 * **pnpm** >= 8.0.0
-* **Koishi Instance**: Running the `server-satori` plugin.
-* **LLM Provider**: OpenAI compatible API (Ollama, vLLM, DeepSeek, etc.).
+* **Koishi インスタンス**: `server-satori` プラグインが動作していること。
+* **LLM プロバイダー**: OpenAI 互換 API（Ollama、vLLM、DeepSeek など）。
 
-## Quick Start
+## クイックスタート
 
-1. **Install Dependencies**
+1. **依存関係のインストール**
 ```bash
 pnpm install
 ```
 
-2. **Configure Environment**
-Copy the example config and edit it:
+2. **環境設定**
+設定例をコピーして編集します：
 
 ```bash
 cp .env .env.local
 ```
 
-**Key Variables:**
+**主要な変数：**
 
 ```env
-# Satori Configuration
+# Satori 設定
 SATORI_WS_URL=ws://localhost:5140/satori/v1/events
 SATORI_API_BASE_URL=http://localhost:5140/satori/v1
-SATORI_TOKEN= # Optional: Leave empty if auth is disabled in Koishi
+SATORI_TOKEN= # オプション：Koishi で認証が無効の場合は空のまま
 
-# LLM (OpenAI Compatible)
+# LLM（OpenAI 互換）
 LLM_API_KEY=your_api_key_here
 LLM_API_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-4
@@ -59,18 +59,18 @@ LLM_RESPONSE_LANGUAGE=English
 LLM_OLLAMA_DISABLE_THINK=false
 ```
 
-3. **Run**
+3. **実行**
 
 ```bash
-# Development (Hot-reload)
+# 開発（ホットリロード）
 pnpm --filter @proj-airi/satori-bot dev
 
-# Production
+# プロダクション
 pnpm --filter @proj-airi/satori-bot start
 ```
 
-## Key Locations
+## 主要な場所
 
-* **Persona & System Prompts**: `src/core/planner/prompts/*.velin.md`
-* **Database (PGlite)**: `data/pglite-db` (See *PERSISTENCE.md* for architecture)
-* **Action Logic**: `src/capabilities/actions/`
+* **ペルソナとシステムプロンプト**: `src/core/planner/prompts/*.velin.md`
+* **データベース（PGlite）**: `data/pglite-db`（アーキテクチャについては *PERSISTENCE.md* を参照）
+* **アクションロジック**: `src/capabilities/actions/`

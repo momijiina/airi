@@ -1,3 +1,3 @@
-# AIRI VSCode Plugin
+# AIRI VSCodeプラグイン
 
-> Official VSCode extension for AIRI, streaming your current working at stuff back to AIRI.
+> AIRI公式のVSCode拡張機能。現在の作業内容をAIRIにストリーミングします。

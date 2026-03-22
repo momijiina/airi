@@ -1,11 +1,11 @@
 # @proj-airi/server-sdk
 
-The SDK for cliet-side code to connect to the server-side components.
+サーバーサイドコンポーネントに接続するためのクライアント側SDK。
 
-## Usage
+## 使い方
 
 ```shell
-ni @proj-airi/server-sdk -D # from @antfu/ni, can be installed via `npm i -g @antfu/ni`
+ni @proj-airi/server-sdk -D # @antfu/ni から。`npm i -g @antfu/ni` でインストール可能
 pnpm i @proj-airi/server-sdk -D
 yarn i @proj-airi/server-sdk -D
 npm i @proj-airi/server-sdk -D
@@ -26,20 +26,20 @@ client.onEvent('input:text', async (event) => {
 })
 ```
 
-`connect()` now resolves when the client is fully ready for use, not just when the websocket transport has opened. In practice that means:
+`connect()` はWebSocketトランスポートが開いただけでなく、クライアントが完全に使用可能になったときに解決されます。具体的には:
 
-- the socket is open
-- authentication succeeded when a token is configured
-- the module has announced itself successfully
+- ソケットがオープン済み
+- トークンが設定されている場合、認証が成功
+- モジュールのアナウンスが成功
 
-Useful runtime helpers:
+便利なランタイムヘルパー:
 
-- `client.connectionStatus` exposes the current lifecycle state
-- `client.isReady` tells you whether the client has completed authentication + announce
-- `client.send()` returns `false` instead of silently dropping messages when the socket is unavailable
-- `client.sendOrThrow()` is available when you want strict delivery semantics
-- `client.onEvent()` returns an unsubscribe function
+- `client.connectionStatus` 現在のライフサイクル状態を公開
+- `client.isReady` クライアントが認証+アナウンスを完了したかを返す
+- `client.send()` ソケットが利用不可の場合、メッセージを無言で破棄せず `false` を返す
+- `client.sendOrThrow()` 厳密な配信セマンティクスが必要な場合に利用可能
+- `client.onEvent()` 購読解除関数を返す
 
-## License
+## ライセンス
 
 [MIT](../../LICENSE)

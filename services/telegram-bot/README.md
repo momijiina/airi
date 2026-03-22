@@ -1,10 +1,10 @@
 # `telegram-bot`
 
-Allow アイリ to talk to you and many other users in Telegram.
+アイリがTelegramであなたや他のユーザーと会話できるようにします。
 
-## Getting started
+## はじめかた
 
-Clone & install dependencies:
+クローンと依存関係のインストール:
 
 ```shell
 git clone git@github.com:moeru-ai/airi.git
@@ -12,21 +12,21 @@ pnpm i
 pnpm run build:packages
 ```
 
-Start Ollama instance for embedding models
+埋め込みモデル用にOllamaインスタンスを起動
 
 ```shell
 ollama start
 ollama pull nomic-embed-text
 ```
 
-Create a `.env.local` file:
+`.env.local` ファイルを作成:
 
 ```shell
 cd services/telegram-bot
 cp .env .env.local
 ```
 
-Fill-in the following credentials as configurations:
+以下の認証情報を設定として入力:
 
 ```shell
 DATABASE_URL=postgres://postgres:123456@localhost:5432/postgres
@@ -47,7 +47,7 @@ EMBEDDING_MODEL=''
 EMBEDDING_DIMENSION=''
 ```
 
-For example:
+例:
 
 ```shell
 DATABASE_URL=postgres://postgres:123456@localhost:5433/postgres
@@ -68,7 +68,7 @@ EMBEDDING_MODEL='nomic-embed-text' # embedding model
 EMBEDDING_DIMENSION='768' # must set
 ```
 
-Start both DB and the bot:
+DBとBotの両方を起動:
 
 ```shell
 docker compose up -d

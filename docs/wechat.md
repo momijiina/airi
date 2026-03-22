@@ -1,5 +1,5 @@
-# 微信群
+# WeChat グループ
 
-扫码添加微信后，请备注：AIRI，我们会邀请你进群。
+QR コードをスキャンして WeChat を追加した後、備考欄に「AIRI」と記入してください。グループに招待いたします。
 
 ![](./content/public/wechat-qr.png)

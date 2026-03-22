@@ -1,3 +1,3 @@
-# References
+# リファレンス
 
-Put MediaPipe Tasks Vision API docs / snippets / notes here so the implementation can follow the exact API surface you’re using.
+MediaPipe Tasks Vision APIのドキュメント/スニペット/ノートをここに配置し、実装が使用するAPIを正確に追従できるようにします。

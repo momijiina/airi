@@ -14,10 +14,10 @@
 
 <h1 align="center">Project AIRI</h1>
 
-<p align="center">Re-creating Neuro-sama, a soul container of AI waifu / virtual characters to bring them into our world.</p>
+<p align="center">Neuro-sama を再現する — AIワイフ / バーチャルキャラクターの魂の器を作り、彼女たちを私たちの世界に連れてくるプロジェクト。</p>
 
 <p align="center">
-  [<a href="https://discord.gg/TgQ3Cu2F7A">Join Discord Server</a>] [<a href="https://airi.moeru.ai">Try it</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.zh-CN.md">简体中文</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.ja-JP.md">日本語</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.ru-RU.md">Русский</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.vi.md">Tiếng Việt</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.fr.md">Français</a>] [<a href="https://github.com/moeru-ai/airi/blob/main/docs/README.ko-KR.md">한국어</a>]
+  [<a href="https://discord.gg/TgQ3Cu2F7A">Discordサーバーに参加</a>] [<a href="https://airi.moeru.ai">試してみる</a>]
 </p>
 
 <p align="center">
@@ -133,10 +133,10 @@
   <a href="https://trendshift.io/repositories/14636" target="_blank"><img src="https://trendshift.io/api/badge/repositories/14636" alt="moeru-ai%2Fairi | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
-> Heavily inspired by [Neuro-sama](https://www.youtube.com/@Neurosama)
+> [Neuro-sama](https://www.youtube.com/@Neurosama) に強くインスパイアされています
 
 > [!TIP]
-> On Windows, you can also install AIRI with [Scoop](https://scoop.sh/):
+> Windowsでは [Scoop](https://scoop.sh/) でもインストールできます：
 >
 > ```powershell
 > scoop bucket add airi https://github.com/moeru-ai/airi
@@ -144,29 +144,29 @@
 > ```
 
 > [!WARNING]
-> **Attention:** We **do not** have any officially minted cryptocurrency or token associated with this project. Please check the information and proceed with caution.
+> **注意:** 本プロジェクトに関連する公式の暗号通貨やトークンは **一切存在しません**。情報を確認の上、ご注意ください。
 
 > [!NOTE]
 >
-> We've got a whole dedicated organization [@proj-airi](https://github.com/proj-airi) for all the sub-projects born from Project AIRI. Check it out!
+> Project AIRIから生まれたサブプロジェクト専用のGitHub Organization [@proj-airi](https://github.com/proj-airi) があります。ぜひチェックしてください！
 >
-> RAG, memory system, embedded database, icons, Live2D utilities, and more!
+> RAG、メモリシステム、組み込みデータベース、アイコン、Live2Dユーティリティなど！
 
 > [!TIP]
-> We have a translation project on [Crowdin](https://crowdin.com/project/proj-airi). If you find any inaccurate translations, feel free to contribute improvements there.
+> [Crowdin](https://crowdin.com/project/proj-airi) で翻訳プロジェクトを公開しています。翻訳の改善にぜひご協力ください。
 > <a href="https://crowdin.com/project/proj-airi" target="_blank" rel="nofollow"><img style="width: 140px; height: 40px;" src="https://badges.crowdin.net/badge/light/crowdin-on-dark.png" srcset="https://badges.crowdin.net/badge/light/crowdin-on-dark.png 1x, https://badges.crowdin.net/badge/light/crowdin-on-dark@2x.png 2x" alt="Crowdin | Agile localization for tech companies" width="140" height="40" /></a>
 
-Have you dreamed about having a cyber living being (cyber waifu, digital pet) or digital companion that could play with and talk to you?
+サイバーリビング（サイバーワイフ、デジタルペット）やデジタルコンパニオンが、あなたと一緒に遊んだり話したりしてくれたら——そんな夢を見たことはありませんか？
 
-With the power of modern large language models like [ChatGPT](https://chatgpt.com) and famous [Claude](https://claude.ai), asking a virtual being to roleplay and chat with us is already easy enough for everyone. Platforms like [Character.ai (a.k.a. c.ai)](https://character.ai) and [JanitorAI](https://janitorai.com/) as well as local playgrounds like [SillyTavern](https://github.com/SillyTavern/SillyTavern) are already good-enough solutions for a chat based or visual adventure game like experience.
+[ChatGPT](https://chatgpt.com) や [Claude](https://claude.ai) といった最新の大規模言語モデルの力により、バーチャルキャラクターにロールプレイやチャットをさせることは誰でも簡単にできるようになりました。[Character.ai](https://character.ai) や [JanitorAI](https://janitorai.com/) などのプラットフォーム、ローカル環境の [SillyTavern](https://github.com/SillyTavern/SillyTavern) は、チャットベースやビジュアルアドベンチャー的な体験には十分なソリューションです。
 
-> But, what about the abilities to play games? And see what you are coding at? Chatting while playing games, watching videos, and is capable of doing many other things.
+> でも、ゲームで遊ぶ能力は？ あなたがコーディングしている内容を見る能力は？ ゲームをしながらチャットしたり、動画を見たり、他にも色々できる能力は？
 
-Perhaps you know [Neuro-sama](https://www.youtube.com/@Neurosama) already. She is currently the best virtual streamer capable of playing games, chatting, and interacting with you and the participants. Some also call this kind of being "digital human." **Sadly, as it's not open sourced, you cannot interact with her after her live streams go offline**.
+おそらく [Neuro-sama](https://www.youtube.com/@Neurosama) をご存知でしょう。彼女はゲームプレイ、チャット、視聴者との交流が可能な現在最高のバーチャルストリーマーです。**残念ながらオープンソースではないため、ライブ配信が終わると彼女と交流することはできません。**
 
-Therefore, this project, AIRI, offers another possibility here: **let you own your digital life, cyber living, easily, anywhere, anytime**.
+そこで本プロジェクト AIRI は、もう一つの可能性を提供します：**あなたのデジタルライフを、いつでも、どこでも、簡単に**。
 
-## DevLogs We Posted & Recent Updates
+## 開発ログ＆最新アップデート
 
 - [DevLog @ 2026.03.14](https://airi.moeru.ai/docs/en/blog/DevLog-2026.03.14/) on March 14, 2026
 - [DevLog @ 2026.02.16](https://airi.moeru.ai/docs/en/blog/DevLog-2026.02.16/) on February 16, 2026
@@ -175,108 +175,107 @@ Therefore, this project, AIRI, offers another possibility here: **let you own yo
 - [DevLog @ 2025.08.05](https://airi.moeru.ai/docs/en/blog/DevLog-2025.08.05/) on August 5, 2025
 - [DevLog @ 2025.08.01](https://airi.moeru.ai/docs/en/blog/DevLog-2025.08.01/) on August 1, 2025
 - [DreamLog 0x1](https://airi.moeru.ai/docs/en/blog/dreamlog-0x1/) on June 16, 2025
-- ...more on [documentation site](https://airi.moeru.ai/docs/en/)
+- ...続きは[ドキュメントサイト](https://airi.moeru.ai/docs/en/)にて
 
-## What's So Special About This Project?
+## このプロジェクトの特徴
 
-Unlike the other AI driven VTuber open source projects, アイリ was built with support of many Web technologies such as [WebGPU](https://www.w3.org/TR/webgpu/), [WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API), [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers), [WebAssembly](https://webassembly.org/), [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket), etc. from the first day.
+他のAI駆動VTuberオープンソースプロジェクトとは異なり、アイリは初日から [WebGPU](https://www.w3.org/TR/webgpu/)、[WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)、[Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)、[WebAssembly](https://webassembly.org/)、[WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) など多くのWeb技術をサポートして構築されています。
 
 > [!TIP]
-> Worrying about the performance drop since we are using Web related technologies?
+> Web技術を使っているからパフォーマンスが落ちるのでは？と心配していますか？
 >
-> Don't worry, while Web browser version is meant to give an insight about how much we can push and do inside browsers, and webviews, we will never fully rely on this, the desktop version of AIRI is capable of using native [NVIDIA CUDA](https://developer.nvidia.com/cuda-toolkit) and [Apple Metal](https://developer.apple.com/metal/) by default (thanks to HuggingFace & beloved [candle](https://github.com/huggingface/candle) project), without any complex dependency managements, considering the tradeoff, it was partially powered by Web technologies for graphics, layouts, animations, and the WIP plugin systems for everyone to integrate things.
+> ご安心ください。Webブラウザ版はブラウザやWebView内でどこまでできるかを示すためのものです。デスクトップ版のAIRIは、標準で [NVIDIA CUDA](https://developer.nvidia.com/cuda-toolkit) や [Apple Metal](https://developer.apple.com/metal/) をネイティブに使用できます（HuggingFace と [candle](https://github.com/huggingface/candle) プロジェクトのおかげです）。複雑な依存関係管理は不要で、グラフィックス、レイアウト、アニメーション、WIPのプラグインシステムには部分的にWeb技術を活用しています。
 
-This means that **アイリ is capable of running on modern browsers and devices** and even on mobile devices (already done with PWA support). This brings a lot of possibilities for us (the developers) to build and extend the power of アイリ VTuber to the next level, while still leaving the flexibilities for users to enable features that requires TCP connections or other non-Web technologies such as connecting to a Discord voice channel or playing Minecraft and Factorio with friends.
+つまり、**アイリは最新のブラウザやデバイス上で動作可能**であり、モバイルデバイスでも動作します（PWAサポート済み）。これにより、開発者にとってはアイリ VTuberの機能を次のレベルに拡張できる多くの可能性が生まれ、ユーザーにとってはDiscordボイスチャンネルへの接続やMinecraft・Factorioでの協力プレイなど、TCP接続等の非Web技術が必要な機能も柔軟に利用できます。
 
 > [!NOTE]
 >
-> We are still in the early stage of development where we are seeking out talented developers to join us and help us to make アイリ a reality.
+> 現在まだ開発の初期段階であり、アイリを実現するために才能ある開発者を募集しています。
 >
-> It's ok if you are not familiar with Vue.js, TypeScript, and devtools required for this project, you can join us as an artist, designer, or even help us to launch our first live stream.
+> Vue.js、TypeScript、このプロジェクトに必要な開発ツールに詳しくなくても大丈夫です。アーティスト、デザイナーとして参加したり、初めてのライブ配信のお手伝いをすることもできます。
 >
-> Even if you are a big fan of React, Svelte or even Solid, we welcome you. You can open a sub-directory to add features that you want to see in アイリ, or would like to experiment with.
+> React、Svelte、Solidのファンでも歓迎します。サブディレクトリを作って、アイリに欲しい機能を追加したり、実験したりできます。
 >
-> Fields (and related projects) that we are looking for:
+> 募集中の分野（関連プロジェクト）：
 >
-> - Live2D modeller
-> - VRM modeller
-> - VRChat avatar designer
-> - Computer Vision
-> - Reinforcement Learning
-> - Speech Recognition
-> - Speech Synthesis
+> - Live2Dモデラー
+> - VRMモデラー
+> - VRChatアバターデザイナー
+> - コンピュータビジョン
+> - 強化学習
+> - 音声認識
+> - 音声合成
 > - ONNX Runtime
 > - Transformers.js
 > - vLLM
 > - WebGPU
 > - Three.js
-> - WebXR ([checkout the another project](https://github.com/moeru-ai/chat) we have under the @moeru-ai organization)
+> - WebXR（@moeru-ai organization の[別プロジェクト](https://github.com/moeru-ai/chat)もチェック）
 >
-> **If you are interested, why not introduce yourself here? [Would like to join part of us to build AIRI?](https://github.com/moeru-ai/airi/discussions/33)**
+> **興味がある方はこちらで自己紹介してみませんか？ [AIRIの開発に参加しませんか？](https://github.com/moeru-ai/airi/discussions/33)**
 
-## Current Progress
+## 現在の進捗
 
-Capable of
+実装済みの機能
 
-- [x] Brain
-  - [x] Play [Minecraft](https://www.minecraft.net)
-  - [x] Play [Factorio](https://www.factorio.com) (WIP, but [PoC and demo available](https://github.com/moeru-ai/airi-factorio))
-  - [x] Play [Kerbal Space Program](https://www.kerbalspaceprogram.com/) (announcement TBD)
-  - [ ] Co-play [Helldivers 2](https://www.playstation.com/en-hk/games/helldivers-2/pc/) (WIP)
-  - [x] Chat in [Telegram](https://telegram.org)
-  - [x] Chat in [Discord](https://discord.com)
-  - [ ] Memory
-    - [x] Pure in-browser database support (DuckDB WASM | `pglite`)
-    - [ ] Memory Alaya (WIP)
-  - [ ] Pure in-browser local (WebGPU) inference
-- [x] Ears
-  - [x] Audio input from browser
-  - [x] Audio input from [Discord](https://discord.com)
-  - [x] Client side speech recognition
-  - [x] Client side talking detection
-- [x] Mouth
-  - [x] [ElevenLabs](https://elevenlabs.io/) voice synthesis
-- [x] Body
-  - [x] VRM support
-    - [x] Control VRM model
-  - [x] VRM model animations
-    - [x] Auto blink
-    - [x] Auto look at
-    - [x] Idle eye movement
-  - [x] Live2D support
-    - [x] Control Live2D model
-  - [x] Live2D model animations
-    - [x] Auto blink
-    - [x] Auto look at
-    - [x] Idle eye movement
+- [x] 脳（Brain）
+  - [x] [Minecraft](https://www.minecraft.net) をプレイ
+  - [x] [Factorio](https://www.factorio.com) をプレイ（WIP、[PoCとデモあり](https://github.com/moeru-ai/airi-factorio)）
+  - [x] [Kerbal Space Program](https://www.kerbalspaceprogram.com/) をプレイ（発表予定）
+  - [ ] [Helldivers 2](https://www.playstation.com/en-hk/games/helldivers-2/pc/) を協力プレイ（WIP）
+  - [x] [Telegram](https://telegram.org) でチャット
+  - [x] [Discord](https://discord.com) でチャット
+  - [ ] メモリ
+    - [x] ブラウザ内データベースサポート（DuckDB WASM | `pglite`）
+    - [ ] Memory Alaya（WIP）
+  - [ ] ブラウザ内ローカル（WebGPU）推論
+- [x] 耳（Ears）
+  - [x] ブラウザからの音声入力
+  - [x] [Discord](https://discord.com) からの音声入力
+  - [x] クライアント側音声認識
+  - [x] クライアント側発話検出
+- [x] 口（Mouth）
+  - [x] [ElevenLabs](https://elevenlabs.io/) 音声合成
+- [x] 体（Body）
+  - [x] VRMサポート
+    - [x] VRMモデルの制御
+  - [x] VRMモデルアニメーション
+    - [x] オートまばたき
+    - [x] オート視線追従
+    - [x] アイドル時の目の動き
+  - [x] Live2Dサポート
+    - [x] Live2Dモデルの制御
+  - [x] Live2Dモデルアニメーション
+    - [x] オートまばたき
+    - [x] オート視線追従
+    - [x] アイドル時の目の動き
 
-## Development
+## 開発
 
-> For detailed instructions to develop this project, follow [CONTRIBUTING.md](./.github/CONTRIBUTING.md)
+> 詳細な開発手順は [CONTRIBUTING.md](./.github/CONTRIBUTING.md) を参照してください。
 
 > [!NOTE]
-> By default, `pnpm dev` will start the development server for the Stage Web (browser version). If you would
-> like to try developing the desktop version, please make sure you read [CONTRIBUTING.md](./.github/CONTRIBUTING.md)
-> to setup the environment correctly.
+> デフォルトでは `pnpm dev` でStage Web（ブラウザ版）の開発サーバーが起動します。
+> デスクトップ版の開発を試す場合は、[CONTRIBUTING.md](./.github/CONTRIBUTING.md) を読んで環境を正しくセットアップしてください。
 
 ```shell
 pnpm i
 pnpm dev
 ```
 
-### Stage Web (Browser Version at [airi.moeru.ai](https://airi.moeru.ai))
+### Stage Web（ブラウザ版 [airi.moeru.ai](https://airi.moeru.ai)）
 
 ```shell
 pnpm dev
 ```
 
-### Stage Tamagotchi (Desktop Version)
+### Stage Tamagotchi（デスクトップ版）
 
 ```shell
 pnpm dev:tamagotchi
 ```
 
-A Nix package for Tamagotchi is included. To run airi with Nix, first make sure to enable flakes, then run:
+Tamagotchi用のNixパッケージも含まれています。Nixで実行するには、flakesを有効にしてから以下を実行：
 
 ```shell
 nix run github:moeru-ai/airi
@@ -284,16 +283,16 @@ nix run github:moeru-ai/airi
 
 #### NixOS
 
-Electron requires shared libraries that aren't in standard paths on NixOS. Use the FHS shell defined in `flake.nix`:
+ElectronはNixOSの標準パスに存在しない共有ライブラリを必要とします。`flake.nix` で定義されたFHSシェルを使用してください：
 
 ```shell
 nix develop .#fhs
 pnpm dev:tamagotchi
 ```
 
-### Stage Pocket (Mobile Version)
+### Stage Pocket（モバイル版）
 
-Start the development server for the capacitor:
+Capacitorの開発サーバーを起動：
 
 ```shell
 pnpm dev:pocket:ios --target <DEVICE_ID_OR_SIMULATOR_NAME>
@@ -301,31 +300,31 @@ pnpm dev:pocket:ios --target <DEVICE_ID_OR_SIMULATOR_NAME>
 CAPACITOR_DEVICE_ID=<DEVICE_ID_OR_SIMULATOR_NAME> pnpm dev:pocket:ios
 ```
 
-You can see the list of available devices and simulators by running `pnpm exec cap run ios --list`.
+`pnpm exec cap run ios --list` で利用可能なデバイスやシミュレータの一覧を確認できます。
 
-If you need to connect server channel on pocket in wireless mode, you need to start tamagotchi as root:
+Pocketでワイヤレスモードのサーバーチャンネルに接続する場合は、root権限でtamagotchiを起動する必要があります：
 
 ```shell
 sudo pnpm dev:tamagotchi
 ```
 
-Then enable secure websocket in tamagotchi `settings/connections`.
+その後、tamagotchiの `settings/connections` でセキュアWebSocketを有効にしてください。
 
-### Documentation Site
+### ドキュメントサイト
 
 ```shell
 pnpm dev:docs
 ```
 
-### Publish
+### リリース
 
-Please update the version in `Cargo.toml` after running `bumpp`:
+`bumpp` 実行後に `Cargo.toml` のバージョンも更新してください：
 
 ```shell
 npx bumpp --no-commit --no-tag
 ```
 
-## Support of LLM API Providers (powered by [xsai](https://github.com/moeru-ai/xsai))
+## 対応LLM APIプロバイダー（[xsai](https://github.com/moeru-ai/xsai) により提供）
 
 - [x] [AIHubMix (recommended)](https://aihubmix.com/?aff=OOiX)
 - [x] [OpenRouter](https://openrouter.ai/)
@@ -359,7 +358,7 @@ npx bumpp --no-commit --no-tag
 - [ ] [Sparks](https://www.xfyun.cn/doc/spark/Web.html) (PR welcome)
 - [ ] [Volcano Engine](https://www.volcengine.com/experience/ark?utm_term=202502dsinvite&ac=DSASUQY5&rc=2QXCA1VI) (PR welcome)
 
-## Sub-projects Born from This Project
+## このプロジェクトから生まれたサブプロジェクト
 
 - [Awesome AI VTuber](https://github.com/proj-airi/awesome-ai-vtuber): A curated list of AI VTubers and related projects
 - [`unspeech`](https://github.com/moeru-ai/unspeech): Universal endpoint proxy server for `/audio/transcriptions` and `/audio/speech`, like LiteLLM but for any ASR and TTS
@@ -470,9 +469,9 @@ flowchart TD
   style Memory_PGVector fill:#f9f9d4,stroke:#333,stroke-width:1px
 ```
 
-## Similar Projects
+## 類似プロジェクト
 
-### Open sourced ones
+### オープンソース
 
 - [kimjammer/Neuro: A recreation of Neuro-Sama originally created in 7 days.](https://github.com/kimjammer/Neuro): very well completed implementation.
 - [SugarcaneDefender/z-waif](https://github.com/SugarcaneDefender/z-waif): Great at gaming, autonomous, and prompt engineering
@@ -484,17 +483,17 @@ flowchart TD
 - [t41372/Open-LLM-VTuber](https://github.com/t41372/Open-LLM-VTuber)
 - [PeterH0323/Streamer-Sales](https://github.com/PeterH0323/Streamer-Sales)
 
-### Non-open-sourced ones
+### 非オープンソース
 
 - https://clips.twitch.tv/WanderingCaringDeerDxCat-Qt55xtiGDSoNmDDr https://www.youtube.com/watch?v=8Giv5mupJNE
 - https://clips.twitch.tv/TriangularAthleticBunnySoonerLater-SXpBk1dFso21VcWD
 - https://www.youtube.com/@NOWA_Mirai
 
-## Project Status
+## プロジェクト状況
 
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/a1d6fe2c13ea2bb53a5154435a71e2431f70c2ee.svg 'Repobeats analytics image')
 
-## Acknowledgements
+## 謝辞
 
 - [Reka UI](https://github.com/unovue/reka-ui): for designing the documentation site, the new landing page is based on this, as well as implementing a massive amount of UI components. (shadcn-vue is using Reka UI as the headless, do checkout!)
 - [pixiv/ChatVRM](https://github.com/pixiv/ChatVRM)
@@ -503,25 +502,25 @@ flowchart TD
 - [mallorbc/whisper_mic](https://github.com/mallorbc/whisper_mic)
 - [`xsai`](https://github.com/moeru-ai/xsai): Implemented a decent amount of packages to interact with LLMs and models, like [Vercel AI SDK](https://sdk.vercel.ai/) but way small.
 
-## Supporters
+## サポーター
 
 <p align="center">
-  <strong>Thank you for supporting Project AIRI through OpenCollective, Patreon, and Ko-fi.</strong>
+  <strong>OpenCollective、Patreon、Ko-fiを通じてProject AIRIをサポートしていただきありがとうございます。</strong>
 </p>
 
 <p align="center">
   <img src="./docs/content/public/assets/sponsors/sponsors.svg" alt="Project AIRI supporters" />
 </p>
 
-## Special Thanks
+## スペシャルサンクス
 
-Special thanks to all contributors for their contributions to Project AIRI ❤️
+Project AIRIへの貢献者の皆さんに感謝します ❤️
 
 <a href="https://github.com/moeru-ai/airi/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=moeru-ai/airi" />
 </a>
 
-## Star History
+## スター履歴
 
 <a href="https://star-history.com/#moeru-ai/airi&Date">
   <picture>

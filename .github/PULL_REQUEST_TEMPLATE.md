@@ -1,11 +1,11 @@
-## Description
+## 説明
 
-<!-- Please insert your description here and especially provide info about the "what" this PR is solving -->
+<!-- ここに説明を記入してください。特にこの PR が何を解決するのかについての情報を提供してください -->
 
-## Linked Issues
+## 関連 Issue
 
-<!-- Optional, if you have any -->
+<!-- オプション、ある場合 -->
 
-## Additional Context
+## 追加コンテキスト
 
-<!-- e.g. is there anything you'd like reviewers to focus on? -->
+<!-- 例：レビュアーに特に見てほしい点はありますか？ -->

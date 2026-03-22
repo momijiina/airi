@@ -1,3 +1,3 @@
 # @proj-airi/airi-plugin-vscode
 
-Host-side plugin that bridges VS Code context and exposes UI contributions in AIRI.
+VS Codeのコンテキストをブリッジし、AIRIでUIコントリビューションを提供するホスト側プラグイン。

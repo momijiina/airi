@@ -1,46 +1,46 @@
 # WIP
 
-**Caution: Documentation below may be out of date.**
+**注意: 以下のドキュメントは最新でない可能性があります。**
 
-## 🧠 Cognitive Architecture
+## 🧠 認知アーキテクチャ
 
-AIRI's Minecraft agent is built on a **four-layered cognitive architecture** inspired by cognitive science, enabling reactive, conscious, and physically grounded behaviors.
+AIRIのMinecraftエージェントは、認知科学にインスパイアされた**4層認知アーキテクチャ**で構築されており、反射的、意識的、かつ物理的に基づいた行動を実現します。
 
-### Architecture Overview
+### アーキテクチャ概要
 
 ```mermaid
 graph TB
-    subgraph "Layer A: Perception"
-        Events[Raw Events]
-        EM[Event Manager]
+    subgraph "レイヤーA: 知覚"
+        Events[生イベント]
+        EM[イベントマネージャー]
         Events --> EM
     end
 
-    subgraph "Layer B: Reflex (Subconscious)"
-        RM[Reflex Manager]
-        FSM[State Machine]
+    subgraph "レイヤーB: 反射（潜在意識）"
+        RM[反射マネージャー]
+        FSM[ステートマシン]
         RM --> FSM
     end
 
-    subgraph "Layer C: Conscious (Reasoning)"
-        ORC[Orchestrator]
-        Planner[Planning Agent (LLM)]
-        Chat[Chat Agent (LLM)]
+    subgraph "レイヤーC: 意識（推論）"
+        ORC[オーケストレーター]
+        Planner[計画エージェント（LLM）]
+        Chat[チャットエージェント（LLM）]
         ORC --> Planner
         ORC --> Chat
     end
 
-    subgraph "Layer D: Action (Execution)"
-        TE[Task Executor]
-        AA[Action Agent]
-        Planner -->|Plan| TE
-        TE -->|Action Steps| AA
+    subgraph "レイヤーD: アクション（実行）"
+        TE[タスクエグゼキュータ]
+        AA[アクションエージェント]
+        Planner -->|計画| TE
+        TE -->|アクションステップ| AA
     end
 
-    EM -->|High Priority| RM
-    EM -->|All Events| ORC
-    RM -.->|Inhibition Signal| ORC
-    ORC -->|Execution Request| TE
+    EM -->|高優先度| RM
+    EM -->|全イベント| ORC
+    RM -.->|抑制シグナル| ORC
+    ORC -->|実行リクエスト| TE
 
     style EM fill:#e1f5ff
     style RM fill:#fff4e1
@@ -48,81 +48,81 @@ graph TB
     style TE fill:#dcedc8
 ```
 
-### Layer A: Perception
+### レイヤーA: 知覚
 
-**Location**: `src/cognitive/perception/`
+**場所**: `src/cognitive/perception/`
 
-The perception layer acts as the sensory input hub, collecting raw Mineflayer signals and translating them into typed events/signals through an event registry + rule engine pipeline.
+知覚レイヤーは感覚入力ハブとして機能し、Mineflayerの生シグナルを収集し、イベントレジストリ＋ルールエンジンパイプラインを通じて型付きイベント/シグナルに変換します。
 
-**Pipeline**:
-- Event definitions in `events/definitions/*` bind Mineflayer events to normalized raw events.
-- `EventRegistry` emits `raw:<modality>:<kind>` events to the cognitive event bus.
-- `RuleEngine` evaluates YAML rules and emits derived `signal:*` events consumed by Reflex/Conscious layers.
+**パイプライン**:
+- `events/definitions/*` のイベント定義がMineflayerイベントを正規化された生イベントにバインド。
+- `EventRegistry` が `raw:<modality>:<kind>` イベントを認知イベントバスに発行。
+- `RuleEngine` がYAMLルールを評価し、反射/意識レイヤーが消費する派生 `signal:*` イベントを発行。
 
-**Key files**:
+**主要ファイル**:
 - `events/index.ts`
 - `events/definitions/*`
 - `rules/engine.ts`
 - `rules/*.yaml`
 - `pipeline.ts`
 
-### Layer B: Reflex
+### レイヤーB: 反射
 
-**Location**: `src/cognitive/reflex/`
+**場所**: `src/cognitive/reflex/`
 
-The reflex layer handles immediate, instinctive reactions. It operates on a finite state machine (FSM) pattern for predictable, fast responses.
+反射レイヤーは即座の本能的な反応を処理します。予測可能で高速な応答のために有限状態マシン（FSM）パターンで動作します。
 
-**Components**:
-- **Reflex Manager** (`reflex-manager.ts`): Coordinates reflex behaviors
-- **Inhibition**: Reflexes can inhibit Conscious layer processing to prevent redundant responses.
+**コンポーネント**:
+- **反射マネージャー** (`reflex-manager.ts`): 反射行動を調整
+- **抑制**: 反射は意識レイヤーの処理を抑制し、冗長な応答を防ぐことができます。
 
-### Layer C: Conscious
+### レイヤーC: 意識
 
-**Location**: `src/cognitive/conscious/`
+**場所**: `src/cognitive/conscious/`
 
-The conscious layer handles complex reasoning, planning, and high-level decision-making. No physical execution happens here anymore.
+意識レイヤーは複雑な推論、計画、高レベルの意思決定を処理します。ここでは物理的な実行は行われません。
 
-**Components**:
-- **Brain** (`brain.ts`): Event queue orchestration, LLM turn lifecycle, safety/budget guards, debug REPL integration.
-- **JavaScript Planner** (`js-planner.ts`): Sandboxed planning/runtime execution against exposed tools/globals.
-- **Query Runtime** (`query-dsl.ts`): Read-only world/inventory/entity query helpers for planner scripts.
-- **Task State** (`task-state.ts`): Cancellation token and task lifecycle primitives used by action execution.
+**コンポーネント**:
+- **Brain** (`brain.ts`): イベントキューオーケストレーション、LLMターンライフサイクル、安全性/予算ガード、デバッグREPL統合。
+- **JavaScriptプランナー** (`js-planner.ts`): 公開されたツール/グローバルに対するサンドボックス化された計画/ランタイム実行。
+- **クエリランタイム** (`query-dsl.ts`): プランナースクリプト用の読み取り専用ワールド/インベントリ/エンティティクエリヘルパー。
+- **タスク状態** (`task-state.ts`): アクション実行で使用されるキャンセルトークンとタスクライフサイクルプリミティブ。
 
-### Layer D: Action
+### レイヤーD: アクション
 
-**Location**: `src/cognitive/action/`
+**場所**: `src/cognitive/action/`
 
-The action layer is responsible for the actual execution of tasks in the world. It isolates "Doing" from "Thinking".
+アクションレイヤーはワールド内でのタスクの実際の実行を担当します。「実行」を「思考」から分離します。
 
-**Components**:
-- **Task Executor** (`task-executor.ts`): Runs normalized action instructions and emits action lifecycle events.
-- **Action Registry** (`action-registry.ts`): Validates params and dispatches tool calls.
-- **Tool Catalog** (`llm-actions.ts`): Action/tool definitions and schemas bound to mineflayer skills.
+**コンポーネント**:
+- **タスクエグゼキュータ** (`task-executor.ts`): 正規化されたアクション命令を実行し、アクションライフサイクルイベントを発行。
+- **アクションレジストリ** (`action-registry.ts`): パラメータの検証とツール呼び出しのディスパッチ。
+- **ツールカタログ** (`llm-actions.ts`): mineflayerスキルにバインドされたアクション/ツール定義とスキーマ。
 
-### 🔄 Event Flow Example
+### 🔄 イベントフローの例
 
-**Scenario: "Build a house"**
+**シナリオ: 「家を建てて」**
 ```txt
-Player: "build a house"
+プレイヤー: 「家を建てて」
   ↓
-[Perception] Event detected
+[知覚] イベント検出
   ↓
-[Conscious] Architect plans the structure
+[意識] アーキテクトが構造を計画
   ↓
-[Action] Executor takes the plan and manages the construction loop:
-    - Step 1: Collect wood (calls ActionRegistry tool)
-    - Step 2: Craft planks
-    - Step 3: Build walls
+[アクション] エグゼキュータが計画を受け取り、建設ループを管理:
+    - ステップ1: 木材を収集（ActionRegistryツールを呼び出し）
+    - ステップ2: 板を作成
+    - ステップ3: 壁を建設
   ↓
-[Conscious] Brain confirms completion: "House is ready!"
+[意識] Brainが完了を確認:「家ができました！」
 ```
 
-### 📁 Project Structure
+### 📁 プロジェクト構成
 
 ```txt
 src/
-├── cognitive/                  # 🧠 Perception → Reflex → Conscious → Action
-│   ├── perception/            # Event definitions + rule evaluation
+├── cognitive/                  # 🧠 知覚 → 反射 → 意識 → アクション
+│   ├── perception/            # イベント定義 + ルール評価
 │   │   ├── events/
 │   │   │   ├── index.ts
 │   │   │   └── definitions/*
@@ -132,73 +132,73 @@ src/
 │   │   │   ├── loader.ts
 │   │   │   └── matcher.ts
 │   │   └── pipeline.ts
-│   ├── reflex/                # Fast, rule-based reactions
+│   ├── reflex/                # 高速なルールベース反応
 │   │   ├── reflex-manager.ts
 │   │   ├── runtime.ts
 │   │   ├── context.ts
 │   │   └── behaviors/idle-gaze.ts
-│   ├── conscious/             # LLM-powered reasoning
-│   │   ├── brain.ts           # Core reasoning loop/orchestration
-│   │   ├── js-planner.ts      # JS planning sandbox
-│   │   ├── query-dsl.ts       # Read-only query runtime
-│   │   ├── llm-log.ts         # Turn/log query helpers
-│   │   ├── task-state.ts      # Task lifecycle enums/helpers
-│   │   └── prompts/           # Prompt definitions (e.g., brain-prompt.ts)
-│   ├── action/                # Task execution layer
-│   │   ├── task-executor.ts   # Executes actions and emits lifecycle events
-│   │   ├── action-registry.ts # Tool dispatch + schema validation
-│   │   ├── llm-actions.ts     # Tool catalog
+│   ├── conscious/             # LLM駆動の推論
+│   │   ├── brain.ts           # コア推論ループ/オーケストレーション
+│   │   ├── js-planner.ts      # JS計画サンドボックス
+│   │   ├── query-dsl.ts       # 読み取り専用クエリランタイム
+│   │   ├── llm-log.ts         # ターン/ログクエリヘルパー
+│   │   ├── task-state.ts      # タスクライフサイクル列挙型/ヘルパー
+│   │   └── prompts/           # プロンプト定義（例: brain-prompt.ts）
+│   ├── action/                # タスク実行レイヤー
+│   │   ├── task-executor.ts   # アクション実行とライフサイクルイベント発行
+│   │   ├── action-registry.ts # ツールディスパッチ + スキーマ検証
+│   │   ├── llm-actions.ts     # ツールカタログ
 │   │   └── types.ts
-│   ├── event-bus.ts           # Event bus core
-│   ├── container.ts           # Dependency injection wiring
-│   ├── index.ts               # Cognitive system entrypoint
-│   └── types.ts               # Shared cognitive types
+│   ├── event-bus.ts           # イベントバスコア
+│   ├── container.ts           # 依存性注入の配線
+│   ├── index.ts               # 認知システムエントリポイント
+│   └── types.ts               # 共有認知型
 ├── libs/
-│   └── mineflayer/           # Mineflayer bot wrapper/adapters
-├── skills/                   # Atomic bot capabilities
-├── composables/              # Reusable functions (config, etc.)
-├── plugins/                  # Mineflayer/bot plugins
-├── debug/                    # Debug web dashboard + MCP bridge
-├── utils/                    # Helpers
-└── main.ts                   # Bot entrypoint
+│   └── mineflayer/           # Mineflayerボットラッパー/アダプター
+├── skills/                   # アトミックなボット機能
+├── composables/              # 再利用可能な関数（設定など）
+├── plugins/                  # Mineflayer/ボットプラグイン
+├── debug/                    # デバッグWebダッシュボード + MCPブリッジ
+├── utils/                    # ヘルパー
+└── main.ts                   # ボットエントリポイント
 ```
 
-### 🎯 Design Principles
+### 🎯 設計原則
 
-1. **Separation of Concerns**: Each layer has a distinct responsibility
-2. **Event-Driven**: Loose coupling via centralized event system
-3. **Inhibition Control**: Reflexes prevent unnecessary LLM calls
-4. **Extensibility**: Easy to add new reflexes or conscious behaviors
-5. **Cognitive Realism**: Mimics human-like perception → reaction → deliberation
+1. **関心の分離**: 各レイヤーに明確な責務
+2. **イベント駆動**: 集中イベントシステムによる疎結合
+3. **抑制制御**: 反射が不要なLLM呼び出しを防止
+4. **拡張性**: 新しい反射や意識的行動の追加が容易
+5. **認知的リアリズム**: 人間のような 知覚 → 反応 → 熟慮 を模倣
 
-### 🚧 Future Enhancements
+### 🚧 今後の拡張予定
 
-- **Perception Layer**:
-  - ⏱️ Temporal context window (remember recent events)
-  - 🎯 Salience detection (filter noise, prioritize important events)
+- **知覚レイヤー**:
+  - ⏱️ 時間的コンテキストウィンドウ（最近のイベントを記憶）
+  - 🎯 顕著性検出（ノイズをフィルタリングし、重要なイベントを優先）
 
-- **Reflex Layer**:
-  - 🏃 Dodge hostile mobs
-  - 🛡️ Emergency combat responses
+- **反射レイヤー**:
+  - 🏃 敵対的モブの回避
+  - 🛡️ 緊急戦闘対応
 
-- **Conscious Layer**:
-  - 💭 Emotional state management
-  - 🧠 Long-term memory integration
-  - 🎭 Personality-driven responses
+- **意識レイヤー**:
+  - 💭 感情状態管理
+  - 🧠 長期記憶の統合
+  - 🎭 パーソナリティ駆動の応答
 
-## 🛠️ Development
+## 🛠️ 開発
 
-### Commands
+### コマンド
 
-- `pnpm dev` - Start the bot in development mode
-- `pnpm lint` - Run ESLint
-- `pnpm typecheck` - Run TypeScript type checking
-- `pnpm test` - Run tests
+- `pnpm dev` - 開発モードでボットを起動
+- `pnpm lint` - ESLintを実行
+- `pnpm typecheck` - TypeScript型チェックを実行
+- `pnpm test` - テストを実行
 
-## 🙏 Acknowledgements
+## 🙏 謝辞
 
 - https://github.com/kolbytn/mindcraft
 
-## 🤝 Contributing
+## 🤝 コントリビュート
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+コントリビュート歓迎です！お気軽にPull Requestを送ってください。

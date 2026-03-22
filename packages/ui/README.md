@@ -1,46 +1,46 @@
 # @proj-airi/ui
 
-A stylized UI component library built with [Reka UI](https://reka-ui.com/) and [UnoCSS](https://unocss.dev/).
+[Reka UI](https://reka-ui.com/) と [UnoCSS](https://unocss.dev/) で構築されたスタイリッシュなUIコンポーネントライブラリ。
 
-To preview the components, refer to the [`stage-ui`](../stage-ui) package for instructions for running the Histoire UI storyboard.
+コンポーネントのプレビューについては、[`stage-ui`](../stage-ui) パッケージのHistoire UIストーリーボードの実行手順を参照してください。
 
-## Get started
+## はじめかた
 
-Install the library:
+ライブラリのインストール:
 
 ```shell
-ni @proj-airi/ui -D # from @antfu/ni, can be installed via `npm i -g @antfu/ni`
+ni @proj-airi/ui -D # @antfu/ni から。`npm i -g @antfu/ni` でインストール可能
 pnpm i @proj-airi/ui -D
 yarn i @proj-airi/ui -D
 npm i @proj-airi/ui -D
 ```
 
-This library requires `unocss` with Attributify Mode and a style reset.
+このライブラリは Attributify Mode とスタイルリセット付きの `unocss` が必要です。
 
-First, install `unocss` if you haven't already:
+まず、`unocss` が未インストールの場合はインストール:
 
 ```shell
 pnpm i -D unocss
 ```
 
-Next, in your `uno.config.ts`, add `presetAttributify()` to your presets array:
+次に、`uno.config.ts` の presets 配列に `presetAttributify()` を追加:
 ```ts
 import { defineConfig, presetAttributify } from 'unocss'
 
 export default defineConfig({
   presets: [
     presetAttributify(),
-    // ...your other presets
+    // ...その他のpreset
   ],
 })
 ```
 
-Finally, import the reset styles in your `main.ts`:
+最後に、`main.ts` でリセットスタイルをインポート:
 ```ts
 import '@unocss/reset/tailwind.css'
 ```
 
-## Usage
+## 使い方
 
 ```vue
 <script setup lang="ts">
@@ -48,11 +48,11 @@ import { Button } from '@proj-airi/ui'
 </script>
 
 <template>
-  <Button>Click me</Button>
+  <Button>クリック</Button>
 </template>
 ```
 
-## Components
+## コンポーネント
 
 * [Animations](src/components/Animations)
     * [TransitionVertical](src/components/Animations/TransitionVertical.vue)
@@ -65,6 +65,6 @@ import { Button } from '@proj-airi/ui'
     * [Select](src/components/Form/Select)
     * [Textarea](src/components/Form/Textarea)
 
-## License
+## ライセンス
 
 [MIT](../../LICENSE)

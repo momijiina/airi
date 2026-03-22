@@ -1,17 +1,17 @@
 # @proj-airi/electron-vueuse
 
-VueUse-like composables and helpers shared across AIRI Electron apps.
+AIRI Electronアプリ全体で共有するVueUseライクなコンポーザブルとヘルパー。
 
-## What it provides
+## 提供機能
 
-- Renderer composables for common Electron behaviors (`mouse`, `window bounds`, `auto updater`, etc.)
-- A reusable Eventa context/invoke pattern (`useElectronEventaContext`, `useElectronEventaInvoke`)
-- Eventa context/invoke ergonomics for renderer code
-- Main-process loop utilities (`useLoop`, `createRendererLoop`)
+- 一般的なElectron動作用のレンダラーコンポーザブル（`mouse`、`window bounds`、`auto updater` など）
+- 再利用可能なEventaコンテキスト/呼び出しパターン（`useElectronEventaContext`、`useElectronEventaInvoke`）
+- レンダラーコード用のEventaコンテキスト/呼び出しエルゴノミクス
+- メインプロセスループユーティリティ（`useLoop`、`createRendererLoop`）
 
-For IPC contract definitions, use `@proj-airi/electron-eventa`.
+IPCコントラクト定義には `@proj-airi/electron-eventa` を使用してください。
 
-## Usage
+## 使い方
 
 ```ts
 import { electron } from '@proj-airi/electron-eventa'

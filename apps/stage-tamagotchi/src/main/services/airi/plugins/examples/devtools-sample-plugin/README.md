@@ -1,32 +1,32 @@
-# Devtools Sample Plugin
+# Devtools サンプルプラグイン
 
-This sample plugin is for validating plugin host behavior in the **Plugin Host Inspector** page.
+このサンプルプラグインは、**Plugin Host Inspector** ページでプラグインホストの動作を検証するためのものです。
 
-## Files
+## ファイル
 
-- `devtools-sample-plugin.json`: plugin manifest (`ManifestV1`)
-- `devtools-sample-plugin.mjs`: plugin implementation
+- `devtools-sample-plugin.json`: プラグインマニフェスト（`ManifestV1`）
+- `devtools-sample-plugin.mjs`: プラグイン実装
 
-The manifest declares the protocol permissions required by `apis.providers.listProviders()`: invoke `capabilities:wait`, invoke `resources:providers:list-providers`, read the provider resource, and wait for the provider-list capability.
+マニフェストは `apis.providers.listProviders()` が必要とするプロトコル権限を宣言します: `capabilities:wait` の呼び出し、`resources:providers:list-providers` の呼び出し、プロバイダーリソースの読み取り、プロバイダーリストケイパビリティの待機。
 
-## How to use
+## 使い方
 
-1. Open `/devtools/plugin-host` in Stage Tamagotchi.
-2. Note the `registry.root` path from the page.
-3. Copy both files into that `registry.root` directory.
-4. In Plugin Host Inspector:
-   - click `Refresh`
-   - find `devtools-sample-plugin`
-   - click `Enable`
-   - click `Load` (or `Load Enabled`)
-5. Confirm:
-   - plugin appears as `loaded`
-   - session phase becomes `ready`
-   - capability list is visible
+1. Stage Tamagotchiで `/devtools/plugin-host` を開く。
+2. ページから `registry.root` パスを確認。
+3. 両ファイルをその `registry.root` ディレクトリにコピー。
+4. Plugin Host Inspectorで:
+   - `Refresh` をクリック
+   - `devtools-sample-plugin` を見つける
+   - `Enable` をクリック
+   - `Load`（または `Load Enabled`）をクリック
+5. 確認:
+   - プラグインが `loaded` と表示される
+   - セッションフェーズが `ready` になる
+   - ケイパビリティリストが表示される
 
-## What this plugin does
+## このプラグインの動作
 
-- `init`: logs startup in renderer/main console.
-- `setupModules`: calls `apis.providers.listProviders()` and logs provider names.
+- `init`: レンダラー/メインコンソールに起動をログ。
+- `setupModules`: `apis.providers.listProviders()` を呼び出し、プロバイダー名をログ。
 
-It does not mutate app state; it is safe for lifecycle verification.
+アプリの状態を変更しないため、ライフサイクル検証に安全です。

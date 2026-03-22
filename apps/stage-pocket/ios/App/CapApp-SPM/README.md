@@ -1,5 +1,5 @@
 # CapApp-SPM
 
-This SPM is used to host SPM dependencies for you Capacitor project
+このSPMはCapacitorプロジェクトのSPM依存関係をホストするために使用されます。
 
-Do not modify the contents of it or there may be unintended consequences.
+内容を変更すると予期しない結果が生じる可能性があります。

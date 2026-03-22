@@ -1,96 +1,96 @@
 # `@proj-airi/stage-ui-three`
 
-Three.js runtime components, stores, composables, and diagnostics used by AIRI stage surfaces.
+AIRIステージサーフェスで使用されるThree.jsランタイムコンポーネント、ストア、コンポーザブル、診断ツール。
 
-## What It Does
+## 機能
 
-- Hosts the shared Three scene root used by stage pages.
-- Loads, mounts, reuses, and disposes VRM models.
-- Exposes a package-local model store for camera, light, environment, and model view state.
-- Provides Three-specific hit testing, render-target helpers, and VRM preview generation.
-- Exposes a local `trace` submodule for Three/VRM runtime diagnostics.
+- ステージページで使用される共有Threeシーンルートをホスト。
+- VRMモデルの読み込み、マウント、再利用、破棄。
+- カメラ、ライト、環境、モデルビュー状態用のパッケージローカルモデルストアを提供。
+- Three固有のヒットテスト、レンダーターゲットヘルパー、VRMプレビュー生成を提供。
+- Three/VRMランタイム診断用のローカル `trace` サブモジュールを提供。
 
-## Exports
+## エクスポート
 
-- `ThreeScene`: the main Three-backed stage component.
-- `useModelStore`: Pinia store for Three scene and model configuration.
-- `@proj-airi/stage-ui-three/trace`: local Eventa trace bus and snapshot helpers.
-- `@proj-airi/stage-ui-three/composables/vrm`: VRM loading and animation helpers.
-- `@proj-airi/stage-ui-three/utils/vrm-preview`: one-off VRM preview rendering.
-- `composables/hit-test` and `composables/render-target`: renderer readback helpers.
+- `ThreeScene`: メインのThreeバックドステージコンポーネント。
+- `useModelStore`: Threeシーンとモデル設定用のPiniaストア。
+- `@proj-airi/stage-ui-three/trace`: ローカルEventaトレースバスとスナップショットヘルパー。
+- `@proj-airi/stage-ui-three/composables/vrm`: VRM読み込みとアニメーションヘルパー。
+- `@proj-airi/stage-ui-three/utils/vrm-preview`: 単発VRMプレビューレンダリング。
+- `composables/hit-test` と `composables/render-target`: レンダラーリードバックヘルパー。
 
-## VRM Lifecycle
+## VRMライフサイクル
 
-VRM runtime management is explicit in this package.
+このパッケージではVRMランタイム管理が明示的に行われます。
 
-- `VRMModel.vue` drives load, commit, and cleanup separately instead of relying on component remounts as the primary lifecycle.
-- Detached VRM instances are cached through `components/Model/vrm-instance-cache.ts` as `ManagedVrmInstance` values.
-- Cache entries are scoped by `scopeKey` and matched by `modelSrc` before reuse.
-- Component unmount may stash the current instance for reuse.
-- Model switch clears the active instance and any detached cache for the current scope.
-- Fresh loads prepare the next VRM off-screen, then commit it into the active scene once ready.
+- `VRMModel.vue` はコンポーネントの再マウントに依存せず、読み込み、コミット、クリーンアップを個別に駆動。
+- デタッチされたVRMインスタンスは `components/Model/vrm-instance-cache.ts` を通じて `ManagedVrmInstance` 値としてキャッシュ。
+- キャッシュエントリは `scopeKey` でスコープされ、再利用前に `modelSrc` で照合。
+- コンポーネントのアンマウント時に現在のインスタンスを再利用用にスタッシュする場合あり。
+- モデル切り替え時はアクティブインスタンスと現在のスコープのデタッチキャッシュをクリア。
+- 新規読み込みは次のVRMをオフスクリーンで準備し、準備完了後にアクティブシーンにコミット。
 
-This keeps ordinary remounts and HMR from immediately forcing deep VRM disposal, while still making model switches deterministic.
+これにより、通常の再マウントやHMRが即座に深いVRM破棄を強制することを防ぎつつ、モデル切り替えを決定論的に保ちます。
 
-## Scene Lifecycle
+## シーンライフサイクル
 
-`ThreeScene` coordinates two independent async readiness signals before the scene becomes interactive:
+`ThreeScene` はシーンがインタラクティブになる前に、2つの独立した非同期準備完了シグナルを調整します:
 
-- **VRM load**: `VRMModel` emits `sceneBootstrap` (geometry data) then `loaded` once the model is committed into the scene.
-- **Controls init**: `OrbitControls` emits `orbitControlsReady` once it has obtained the camera and renderer references.
+- **VRM読み込み**: `VRMModel` が `sceneBootstrap`（ジオメトリデータ）を発行し、モデルがシーンにコミットされると `loaded` を発行。
+- **コントロール初期化**: `OrbitControls` がカメラとレンダラー参照を取得すると `orbitControlsReady` を発行。
 
-These two signals are coordinated through a binding transaction tracked in `useModelStore`:
+これら2つのシグナルは `useModelStore` で追跡されるバインディングトランザクションを通じて調整:
 
-- `scenePhase`: the current phase of the scene — `pending` → `loading` → `binding` → `mounted` (or `error` / `no-model`).
-- `sceneTransactionDepth`: incremented at the start of a load or rebind cycle, decremented when binding completes. The scene is considered mid-flight whenever depth > 0.
-- `sceneMutationLocked`: computed from `scenePhase` and `sceneTransactionDepth`. True whenever the scene is not yet mounted or a transaction is in progress. Used to gate user interactions like orbit controls.
+- `scenePhase`: シーンの現在のフェーズ — `pending` → `loading` → `binding` → `mounted`（または `error` / `no-model`）。
+- `sceneTransactionDepth`: 読み込みまたは再バインドサイクルの開始時にインクリメント、バインディング完了時にデクリメント。depth > 0の間、シーンは進行中と見なされる。
+- `sceneMutationLocked`: `scenePhase` と `sceneTransactionDepth` から計算。シーンが未マウントまたはトランザクション進行中の場合にtrue。オービットコントロールなどのユーザーインタラクションのゲートに使用。
 
-When either signal arrives, `ThreeScene` calls `completeSceneBinding()`. That function:
+いずれかのシグナルが到着すると、`ThreeScene` が `completeSceneBinding()` を呼び出します。この関数:
 
-1. Sets `scenePhase` to `'binding'` immediately to block premature `mounted` resolution.
-2. Applies the pending `SceneBootstrap` payload (camera position, model origin, eye height, etc.) if one exists.
-3. Calls `controlsRef.update()` after a `nextTick` so OrbitControls reads the updated camera state.
-4. Resolves `scenePhase` to its final value based on current `modelPhase` and `canvasReady`.
+1. `scenePhase` を即座に `'binding'` に設定し、早期の `mounted` 解決をブロック。
+2. 保留中の `SceneBootstrap` ペイロード（カメラ位置、モデル原点、目の高さなど）があれば適用。
+3. OrbitControlsが更新されたカメラ状態を読み取れるよう、`nextTick` 後に `controlsRef.update()` を呼び出し。
+4. 現在の `modelPhase` と `canvasReady` に基づいて `scenePhase` を最終値に解決。
 
-Whichever signal arrives second completes the binding. The first signal to arrive finds the other not yet ready and resolves back to `'loading'`.
+2番目に到着したシグナルがバインディングを完了します。最初に到着したシグナルはもう一方がまだ準備できていないことを検出し、`'loading'` に戻ります。
 
-### Camera Preservation on Model Switch
+### モデル切り替え時のカメラ保持
 
-`SceneBootstrap` carries a `cacheHit` flag. `ThreeScene.applySceneBootstrap` uses the transaction reason to decide how to apply bootstrap data:
+`SceneBootstrap` は `cacheHit` フラグを持っています。`ThreeScene.applySceneBootstrap` はトランザクション理由に基づいてブートストラップデータの適用方法を決定:
 
-- `initial-load` / `unknown`: camera position and target are reset to the model's computed defaults.
-- `model-switch`: the user's existing camera offset and look-at angle relative to the previous model origin are preserved and projected onto the new model origin.
+- `initial-load` / `unknown`: カメラ位置とターゲットをモデルの計算されたデフォルトにリセット。
+- `model-switch`: ユーザーの既存のカメラオフセットと前のモデル原点に対するルックアット角度を保持し、新しいモデル原点に投影。
 
-### Subtree Watch
+### サブツリーウォッチ
 
-`ThreeScene` watches `modelRef` and `controlsRef` with `flush: 'sync'` to detect immediate detach events within the same tick. When `controlsRef` goes null (e.g. TresJS internal remount), `controlsReady` resets and a new binding transaction opens. When `modelRef` goes null, `scenePhase` reverts to `loading` without opening a new transaction, since the next `loadStart` event from `VRMModel` will open one.
+`ThreeScene` は `modelRef` と `controlsRef` を `flush: 'sync'` で監視し、同一ティック内の即時デタッチイベントを検出します。`controlsRef` がnullになると（例: TresJS内部の再マウント）、`controlsReady` がリセットされ新しいバインディングトランザクションが開始。`modelRef` がnullになると、次の `VRMModel` からの `loadStart` イベントがトランザクションを開くため、新しいトランザクションを開かずに `scenePhase` が `loading` に戻ります。
 
-## `trace` Submodule
+## `trace` サブモジュール
 
-`@proj-airi/stage-ui-three/trace` provides:
+`@proj-airi/stage-ui-three/trace` は以下を提供:
 
-- A local Eventa context for Three/VRM runtime trace events.
-- Ref-counted enable/disable controls so hot paths can short-circuit when tracing is off.
-- Shared event definitions for:
-  - Three render info
-  - Three hit-test readback
-  - VRM update frame breakdown
-  - VRM load start / end / error
-  - VRM dispose start / end
-- Resource snapshot helpers for renderer memory and VRM scene summaries.
+- Three/VRMランタイムトレースイベント用のローカルEventaコンテキスト。
+- トレーシングがオフの場合にホットパスがショートサーキットできる参照カウント式の有効化/無効化制御。
+- 以下の共有イベント定義:
+  - Threeレンダー情報
+  - Threeヒットテストリードバック
+  - VRM更新フレーム分解
+  - VRM読み込み開始/終了/エラー
+  - VRM破棄開始/終了
+- レンダラーメモリとVRMシーンサマリー用のリソーススナップショットヘルパー。
 
-The trace bus is intentionally local to `stage-ui-three`. Desktop apps can bridge it across renderer windows when needed, but the source of truth stays in this package.
+トレースバスは意図的に `stage-ui-three` にローカルです。デスクトップアプリは必要に応じてレンダラーウィンドウ間でブリッジできますが、信頼できるソースはこのパッケージに留まります。
 
-## When To Use It
+## 使用すべきとき
 
-- Use it when a stage surface needs a Three-backed renderer.
-- Use `useModelStore` when the page needs to control camera, lighting, model transforms, or renderer-facing state.
-- Use `@proj-airi/stage-ui-three/trace` when you need Three/VRM runtime telemetry without routing through Vue parent chains.
-- Use `utils/vrm-preview` for isolated preview rendering that should not participate in the main stage lifecycle.
+- ステージサーフェスにThreeバックドレンダラーが必要な場合。
+- ページがカメラ、ライティング、モデルトランスフォーム、レンダラー向け状態を制御する必要がある場合に `useModelStore` を使用。
+- Vueの親チェーンを経由せずにThree/VRMランタイムテレメトリが必要な場合に `@proj-airi/stage-ui-three/trace` を使用。
+- メインステージライフサイクルに参加すべきでない単発プレビューレンダリングに `utils/vrm-preview` を使用。
 
-## When Not To Use It
+## 使用すべきでないとき
 
-- Do not use it as a global business event bus.
-- Do not use the `trace` submodule for Live2D or non-Three runtime telemetry.
-- Do not route renderer-to-main control flow through the `trace` submodule; keep control IPC in app-level contracts.
-- Do not use the VRM instance cache as a general shared asset cache across apps or windows.
+- グローバルビジネスイベントバスとして使用しない。
+- Live2Dや非Threeランタイムテレメトリに `trace` サブモジュールを使用しない。
+- `trace` サブモジュールを通じてレンダラーからメインへの制御フローをルーティングしない。制御IPCはアプリレベルのコントラクトに保つ。
+- VRMインスタンスキャッシュをアプリやウィンドウ間の汎用共有アセットキャッシュとして使用しない。

@@ -1,35 +1,35 @@
 # @proj-airi/model-driver-mediapipe
 
-Single-person motion capture workshop package.
+単一人物モーションキャプチャワークショップパッケージ。
 
-**Goal**
+**目標**
 
-Provide a minimal closed loop that stage-web can consume:
+stage-webが利用できる最小限のクローズドループを提供:
 
-`camera frame` → `MediaPipe Tasks Vision` → `PerceptionState` → `canvas overlay`
+`カメラフレーム` → `MediaPipe Tasks Vision` → `PerceptionState` → `キャンバスオーバーレイ`
 
-**Where to try it**
+**試す場所**
 
-- Devtools page: `apps/stage-web/src/pages/devtools/model-driver-mediapipe.vue`
-- Menu entry: Settings → System → Developer → “MediaPipe Workshop”
+- Devtoolsページ: `apps/stage-web/src/pages/devtools/model-driver-mediapipe.vue`
+- メニュー: 設定 → システム → 開発者 → "MediaPipe Workshop"
 
-**Key files**
+**主要ファイル**
 
-- `packages/model-driver-mediapipe/src/types.ts`: middle-layer contract (`PerceptionState`)
-- `packages/model-driver-mediapipe/src/engine.ts`: scheduler + dropped-frame policy + state merge
-- `packages/model-driver-mediapipe/src/backends/mediapipe.ts`: `@mediapipe/tasks-vision` integration
-- `packages/model-driver-mediapipe/src/utils/overlay.ts`: canvas overlay renderer
+- `packages/model-driver-mediapipe/src/types.ts`: 中間層コントラクト（`PerceptionState`）
+- `packages/model-driver-mediapipe/src/engine.ts`: スケジューラー + フレームドロップポリシー + 状態マージ
+- `packages/model-driver-mediapipe/src/backends/mediapipe.ts`: `@mediapipe/tasks-vision` 統合
+- `packages/model-driver-mediapipe/src/utils/overlay.ts`: キャンバスオーバーレイレンダラー
 
-**Backend assumptions**
+**バックエンドの前提条件**
 
-- Single person (`maxPeople: 1`)
-- Running mode: `VIDEO`
-- Landmarks are normalized (`x`/`y` in `[0..1]`) and drawn onto the overlay canvas
+- 単一人物（`maxPeople: 1`）
+- 実行モード: `VIDEO`
+- ランドマークは正規化（`x`/`y` が `[0..1]`）され、オーバーレイキャンバスに描画
 
-**Docs**
+**ドキュメント**
 
-Keep upstream docs/snippets in `packages/model-driver-mediapipe/references/`.
+アップストリームのドキュメント/スニペットは `packages/model-driver-mediapipe/references/` に配置。
 
-The minimal API surface this package uses is summarized in:
+このパッケージが使用する最小限のAPIは以下にまとめられています:
 
 - `packages/model-driver-mediapipe/references/tasks-vision-api.md`

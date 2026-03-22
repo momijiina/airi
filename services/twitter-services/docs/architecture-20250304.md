@@ -1,32 +1,32 @@
-# Twitter Service Architecture Documentation
+# Twitter サービスアーキテクチャドキュメント
 
-## 1. Project Overview
+## 1. プロジェクト概要
 
-Twitter Service is a web automation service based on BrowserBase, providing structured access and interaction capabilities with Twitter data. It employs a layered architecture design that supports multiple adapters for integration with different applications.
+Twitter サービスは BrowserBase ベースの Web オートメーションサービスで、Twitter データへの構造化されたアクセスとインタラクション機能を提供します。レイヤードアーキテクチャ設計を採用し、異なるアプリケーションとの統合のために複数のアダプターをサポートしています。
 
-## 2. Design Goals
+## 2. 設計目標
 
-- **Reliability**: Stable handling of Twitter page changes and limitations
-- **Scalability**: Easy to add new features and support different integration methods
-- **Performance Optimization**: Intelligent management of request frequency and browser sessions
-- **Data Structuring**: Provides standardized, typed data models
+- **信頼性**: Twitter ページの変更と制限の安定した処理
+- **拡張性**: 新機能の追加と異なる統合方法のサポートが容易
+- **パフォーマンス最適化**: リクエスト頻度とブラウザセッションのインテリジェントな管理
+- **データ構造化**: 標準化された型付きデータモデルの提供
 
-## 3. Architecture Overview
+## 3. アーキテクチャ概要
 
 ```txt
 ┌─────────────────────────────────────────────┐
-│               Application/Consumer Layer    │
+│          アプリケーション/コンシューマー層    │
 │                                             │
 │   ┌────────────┐         ┌─────────────┐    │
 │   │            │         │             │    │
-│   │  AIRI Core │         │ Other LLM   │    │
-│   │            │         │ Applications│    │
+│   │  AIRI Core │         │ その他 LLM   │    │
+│   │            │         │ アプリケーション│   │
 │   │            │         │             │    │
 │   └──────┬─────┘         └──────┬──────┘    │
 └──────────┼─────────────────────┼────────────┘
            │                     │
 ┌──────────▼─────────────────────▼────────────┐
-│                  Adapter Layer              │
+│                 アダプター層                 │
 │                                             │
 │   ┌────────────┐         ┌─────────────┐    │
 │   │AIRI Adapter│         │ MCP Adapter │    │
@@ -35,7 +35,7 @@ Twitter Service is a web automation service based on BrowserBase, providing stru
 └──────────┼─────────────────────┼────────────┘
            │                     │
 ┌──────────▼─────────────────────▼────────────┐
-│                 Core Services Layer         │
+│               コアサービス層                 │
 │                                             │
 │   ┌──────────────────────────────────┐      │
 │   │          Twitter Services        │      │
@@ -49,7 +49,7 @@ Twitter Service is a web automation service based on BrowserBase, providing stru
 └──────────────────────┼──────────────────────┘
                       │
           ┌───────────▼────────────┐
-          │ Browser Adapter Layer  │
+          │  ブラウザアダプター層    │
           │   (BrowserAdapter)     │
           └───────────┬────────────┘
                       │
@@ -62,139 +62,139 @@ Twitter Service is a web automation service based on BrowserBase, providing stru
           └────────────────────────┘
 ```
 
-## 4. Technology Stack and Dependencies
+## 4. 技術スタックと依存関係
 
-- **Core Library**: TypeScript, Node.js
-- **Browser Automation**: BrowserBase Stagehand, Playwright
-- **HTML Parsing**: unified, rehype-parse, unist-util-visit
-- **API Server**: H3.js, listhen
-- **Adapters**: AIRI Server SDK, MCP SDK
-- **Logging System**: @guiiai/logg
-- **Configuration**: defu (deep merging configurations)
-- **Utility Library**: zod (type validation)
+- **コアライブラリ**: TypeScript、Node.js
+- **ブラウザオートメーション**: BrowserBase Stagehand、Playwright
+- **HTML パーシング**: unified、rehype-parse、unist-util-visit
+- **API サーバー**: H3.js、listhen
+- **アダプター**: AIRI Server SDK、MCP SDK
+- **ロギングシステム**: @guiiai/logg
+- **設定**: defu（ディープマージ設定）
+- **ユーティリティライブラリ**: zod（型バリデーション）
 
-## 5. Key Components
+## 5. 主要コンポーネント
 
-### 5.1 Adapter Layer
+### 5.1 アダプター層
 
-#### 5.1.1 AIRI Adapter
+#### 5.1.1 AIRI アダプター
 
-Provides integration with the AIRI LLM platform, handling event-driven communication.
+AIRI LLM プラットフォームとの統合を提供し、イベント駆動型の通信を処理します。
 
-#### 5.1.2 MCP Adapter
+#### 5.1.2 MCP アダプター
 
-Implements the Model Context Protocol interface, providing communication based on HTTP. Currently using the official MCP SDK implementation, providing high-performance HTTP server and SSE communication through H3.js.
+Model Context Protocol インターフェースを実装し、HTTP ベースの通信を提供します。現在、公式 MCP SDK 実装を使用し、H3.js を通じて高性能 HTTP サーバーと SSE 通信を提供しています。
 
-The MCP adapter exposes several tools and resources:
+MCP アダプターはいくつかのツールとリソースを公開します：
 
-- **Timeline Resource**: Access tweets from the user's timeline
-- **Tweet Details Resource**: Get detailed information about a specific tweet
-- **User Profile Resource**: Retrieve user profile information
+- **タイムラインリソース**: ユーザーのタイムラインからツイートにアクセス
+- **ツイート詳細リソース**: 特定のツイートの詳細情報を取得
+- **ユーザープロフィールリソース**: ユーザープロフィール情報を取得
 
-Additionally, it provides tools for interaction:
+さらに、インタラクション用のツールを提供します：
 
-- **Login Tool**: Simplified authentication tool that provides clear feedback on session status. It attempts to load existing sessions, and clearly communicates whether a session was loaded successfully or if manual login is required. The tool no longer requires username/password parameters, as it relies on the enhanced session management system.
-- **Post Tweet Tool**: Create and publish new tweets
-- **Like Tweet Tool**: Like a tweet by its ID
-- **Retweet Tool**: Retweet a tweet by its ID
-- **Refresh Timeline Tool**: Refresh the timeline with the latest tweets, with options to control the count and whether to include replies and retweets.
-- **Get My Profile Tool**: Get information about a user's profile. It can extract the username from the current URL or accept a specific username as a parameter.
+- **ログインツール**: セッション状態について明確なフィードバックを提供する簡略化された認証ツール。既存のセッションのロードを試み、セッションが正常にロードされたか、手動ログインが必要かを明確に伝えます。強化されたセッション管理システムに依存するため、ユーザー名/パスワードパラメータは不要になりました。
+- **ツイート投稿ツール**: 新しいツイートの作成と公開
+- **いいねツール**: ID でツイートにいいね
+- **リツイートツール**: ID でツイートをリツイート
+- **タイムライン更新ツール**: 最新のツイートでタイムラインを更新。件数の制御や、リプライとリツイートを含めるかどうかのオプション付き。
+- **プロフィール取得ツール**: ユーザーのプロフィール情報を取得。現在の URL からユーザー名を抽出するか、特定のユーザー名をパラメータとして受け取ることができます。
 
-The adapter uses internationalized messages (Chinese/English) to provide clear feedback to users about login status and session management.
+アダプターは国際化されたメッセージ（中国語/英語）を使用して、ログイン状態とセッション管理について明確なフィードバックをユーザーに提供します。
 
-#### 5.1.3 Development Server
+#### 5.1.3 開発サーバー
 
-Using listhen for optimized development experience, including automatic browser opening, real-time logging, and debugging tools.
+listhen を使用して最適化された開発体験を提供。自動ブラウザオープン、リアルタイムロギング、デバッグツールを含みます。
 
-### 5.2 Core Service Layer
+### 5.2 コアサービス層
 
-#### 5.2.1 Authentication Service (Auth Service)
+#### 5.2.1 認証サービス（Auth Service）
 
-The Authentication Service has been significantly enhanced to improve reliability and error handling:
+認証サービスは信頼性とエラーハンドリングを改善するために大幅に強化されました：
 
-1. **Improved Session Detection**: Enhanced logic for detecting existing browser sessions
-2. **Robust Error Handling**: Implemented granular error handling to distinguish between different authentication failure types
-3. **Timeout Optimization**: Adjusted timeouts for various operations to enhance stability during network fluctuations
-4. **Enhanced Cookie Management**: Improved cookie storage and loading mechanisms to reduce the need for manual login
-5. **Session Validation**: Added comprehensive session validation to verify the integrity of saved sessions
-6. **Simplified API**: Removed the need for explicit username/password in the login method, relying instead on session files and browser session detection
+1. **改善されたセッション検出**: 既存のブラウザセッション検出のロジックを強化
+2. **堅牢なエラーハンドリング**: 異なる認証失敗タイプを区別するための詳細なエラーハンドリングを実装
+3. **タイムアウト最適化**: ネットワーク変動時の安定性を向上するために、各種操作のタイムアウトを調整
+4. **強化された Cookie 管理**: 手動ログインの必要性を減らすために Cookie の保存とロードメカニズムを改善
+5. **セッションバリデーション**: 保存されたセッションの整合性を検証するための包括的なセッションバリデーションを追加
+6. **簡略化された API**: ログインメソッドでの明示的なユーザー名/パスワードの必要性を削除し、セッションファイルとブラウザセッション検出に依存
 
-The service follows a multi-stage authentication approach:
+サービスは多段階認証アプローチに従います：
 
-1. **Session File Loading**: First attempts to load saved sessions from disk
-2. **Existing Session Detection**: Checks if the browser already has a valid Twitter session
-3. **Manual Login Process**: If necessary, guides through the Twitter login page
+1. **セッションファイルのロード**: まずディスクから保存されたセッションのロードを試行
+2. **既存セッションの検出**: ブラウザに有効な Twitter セッションがあるかを確認
+3. **手動ログインプロセス**: 必要に応じて、Twitter ログインページをガイド
 
-After successful authentication through any method, sessions are automatically persisted for future use. The system provides clear feedback to users about the current login state and automatically monitors and saves sessions when changes are detected.
+いずれかの方法で認証に成功した後、セッションは将来の使用のために自動的に永続化されます。システムは現在のログイン状態についてユーザーに明確なフィードバックを提供し、変更が検出された場合にセッションを自動的に監視・保存します。
 
-#### 5.2.2 Timeline Service (Timeline Service)
+#### 5.2.2 タイムラインサービス（Timeline Service）
 
-Gets and processes Twitter timeline content.
+Twitter タイムラインのコンテンツを取得・処理します。
 
-#### 5.2.3 Other Services
+#### 5.2.3 その他のサービス
 
-Includes search service, interaction service, user profile service, etc. (not implemented in MVP)
+検索サービス、インタラクションサービス、ユーザープロフィールサービスなどを含みます。（MVP では未実装）
 
-### 5.3 Parsers and Tools
+### 5.3 パーサーとツール
 
-#### 5.3.1 Tweet Parser
+#### 5.3.1 ツイートパーサー
 
-Extracts structured data from HTML.
+HTML から構造化データを抽出します。
 
-#### 5.3.2 Rate Limiter
+#### 5.3.2 レートリミッター
 
-Controls request frequency to avoid triggering Twitter limits.
+Twitter の制限トリガーを回避するためにリクエスト頻度を制御します。
 
-#### 5.3.3 Session Manager
+#### 5.3.3 セッションマネージャー
 
-Manages authentication session data, providing methods to:
+認証セッションデータを管理し、以下のメソッドを提供します：
 
-- Save session cookies to local files
-- Load previous sessions during startup
-- Delete invalid or expired sessions
-- Validate session age and integrity
+- セッション Cookie をローカルファイルに保存
+- 起動時に以前のセッションをロード
+- 無効または期限切れのセッションを削除
+- セッションの有効期間と整合性を検証
 
-### 5.3.4 Browser Adapter Layer
+### 5.3.4 ブラウザアダプター層
 
-The service has migrated from direct BrowserBase API usage to Stagehand, an AI-powered web browsing framework built on top of Playwright. Stagehand offers three core APIs that simplify browser automation:
+サービスは直接の BrowserBase API 使用から、Playwright 上に構築された AI 搭載 Web ブラウジングフレームワークである Stagehand に移行しました。Stagehand はブラウザ自動化を簡素化する 3 つのコア API を提供します：
 
-- **act**: Execute actions on the page through natural language instructions
-- **extract**: Retrieve structured data from the page using natural language queries
-- **observe**: Analyze the page and suggest possible actions before execution
+- **act**: 自然言語の指示でページ上のアクションを実行
+- **extract**: 自然言語クエリでページから構造化データを取得
+- **observe**: ページを分析し、実行前に可能なアクションを提案
 
-Stagehand processes the DOM in chunks to optimize LLM performance and provides fallback vision capabilities for complex page structures. This migration significantly improves code maintainability and automation reliability when interacting with Twitter's interface.
+Stagehand は DOM をチャンクで処理して LLM パフォーマンスを最適化し、複雑なページ構造のためのフォールバックビジョン機能を提供します。この移行により、Twitter のインターフェースとのインタラクション時のコードの保守性と自動化の信頼性が大幅に向上しました。
 
-## 6. Data Flow
+## 6. データフロー
 
-1. **Request Flow**: Application Layer → Adapter → Core Service → Browser Adapter Layer → BrowserBase API → Twitter
-2. **Response Flow**: Twitter → BrowserBase API → Browser Adapter Layer → Core Service → Data Parsing → Adapter → Application Layer
-3. **Authentication Flow**:
-   - Load Session → Check Existing Session → Manual Login → Session Validation → Session Storage
-   - Clear feedback is provided at each step of the authentication process
+1. **リクエストフロー**: アプリケーション層 → アダプター → コアサービス → ブラウザアダプター層 → BrowserBase API → Twitter
+2. **レスポンスフロー**: Twitter → BrowserBase API → ブラウザアダプター層 → コアサービス → データパーシング → アダプター → アプリケーション層
+3. **認証フロー**:
+   - セッションロード → 既存セッション確認 → 手動ログイン → セッションバリデーション → セッションストレージ
+   - 認証プロセスの各ステップで明確なフィードバックが提供されます
 
-## 7. Configuration System
+## 7. 設定システム
 
-The configuration system has been optimized using the `defu` library for deep merging configurations, eliminating redundant initialization. The updated configuration structure includes Stagehand-specific settings:
+設定システムは `defu` ライブラリを使用してディープマージ設定を行うように最適化され、冗長な初期化を排除しました。更新された設定構造には Stagehand 固有の設定が含まれます：
 
 ```typescript
 interface Config {
-  // BrowserBase/Stagehand configuration
+  // BrowserBase/Stagehand 設定
   browserbase: {
     apiKey: string
     projectId?: string
     endpoint?: string
     stagehand?: {
-      modelName?: string // e.g., "gpt-4o" or "claude-3-5-sonnet-latest"
+      modelName?: string // 例："gpt-4o" または "claude-3-5-sonnet-latest"
       modelClientOptions?: {
-        apiKey: string // OpenAI or Anthropic API key
+        apiKey: string // OpenAI または Anthropic API キー
       }
     }
   }
 
-  // Browser configuration
+  // ブラウザ設定
   browser: BrowserConfig
 
-  // Twitter configuration
+  // Twitter 設定
   twitter: {
     credentials?: TwitterCredentials
     defaultOptions?: {
@@ -203,7 +203,7 @@ interface Config {
     }
   }
 
-  // Adapter configuration
+  // アダプター設定
   adapters: {
     airi?: {
       url?: string
@@ -216,7 +216,7 @@ interface Config {
     }
   }
 
-  // System configuration
+  // システム設定
   system: {
     logLevel: string
     concurrency: number
@@ -224,74 +224,74 @@ interface Config {
 }
 ```
 
-The system no longer relies on the `TWITTER_COOKIES` environment variable, as cookies are now managed through the session management system.
+システムは `TWITTER_COOKIES` 環境変数に依存しなくなりました。Cookie はセッション管理システムを通じて管理されます。
 
-## 8. Development and Testing
+## 8. 開発とテスト
 
-### 8.1 Development Environment Setup
+### 8.1 開発環境セットアップ
 
 ```bash
-# Install dependencies
+# 依存関係のインストール
 npm install
 
-# Set environment variables
+# 環境変数の設定
 cp .env.example .env
-# Edit .env to add BrowserBase API key and Twitter credentials (optional)
+# .env を編集して BrowserBase API キーと Twitter 認証情報を追加（オプション）
 
-# Development mode startup
-npm run dev        # Standard mode
-npm run dev:mcp    # MCP development server mode
+# 開発モード起動
+npm run dev        # 標準モード
+npm run dev:mcp    # MCP 開発サーバーモード
 ```
 
-### 8.2 Testing Strategy
+### 8.2 テスト戦略
 
-- **Unit Tests**: Test parsers, utility classes, and business logic
-- **Integration Tests**: Test service and adapter interaction
-- **End-to-End Tests**: Simulate complete usage scenarios
+- **ユニットテスト**: パーサー、ユーティリティクラス、ビジネスロジックのテスト
+- **統合テスト**: サービスとアダプターのインタラクションテスト
+- **E2E テスト**: 完全な使用シナリオのシミュレーション
 
-## 9. Integration Example
+## 9. 統合例
 
-### 9.1 Integration Example with Stagehand
+### 9.1 Stagehand との統合例
 
 ```typescript
 import { StagehandAdapter, TwitterService } from 'twitter-services'
 
 async function main() {
-  // Initialize Stagehand adapter
+  // Stagehand アダプターの初期化
   const browser = new StagehandAdapter(process.env.BROWSERBASE_API_KEY, process.env.BROWSERBASE_PROJECT_ID)
   await browser.initialize({
     headless: true,
     stagehand: {
-      modelName: 'gpt-4o', // Or 'claude-3-5-sonnet-latest' for Anthropic
+      modelName: 'gpt-4o', // または Anthropic の場合 'claude-3-5-sonnet-latest'
       modelClientOptions: {
-        apiKey: process.env.OPENAI_API_KEY // Or process.env.ANTHROPIC_API_KEY
+        apiKey: process.env.OPENAI_API_KEY // または process.env.ANTHROPIC_API_KEY
       }
     }
   })
 
-  // Create Twitter service
+  // Twitter サービスの作成
   const twitter = new TwitterService(browser)
 
-  // Authenticate - will try multi-stage approach
+  // 認証 - 多段階アプローチを試行
   const loggedIn = await twitter.login()
 
   if (loggedIn) {
-    console.info('Login successful')
+    console.info('ログイン成功')
 
-    // Get timeline using natural language capabilities of Stagehand
+    // Stagehand の自然言語機能を使用してタイムラインを取得
     const tweets = await twitter.getTimeline({ count: 10 })
     console.info(tweets)
   }
   else {
-    console.error('Login failed')
+    console.error('ログイン失敗')
   }
 
-  // Release resources
+  // リソースの解放
   await browser.close()
 }
 ```
 
-### 9.2 Integrating as AIRI Module
+### 9.2 AIRI モジュールとしての統合
 
 ```typescript
 import { AIRIAdapter, BrowserBaseMCPAdapter, TwitterService } from 'twitter-services'
@@ -302,95 +302,95 @@ async function startAIRIModule() {
 
   const twitter = new TwitterService(browser)
 
-  // Create AIRI adapter
+  // AIRI アダプターの作成
   const airiAdapter = new AIRIAdapter(twitter, {
     url: process.env.AIRI_URL,
     token: process.env.AIRI_TOKEN
   })
 
-  // Start adapter
+  // アダプターの起動
   await airiAdapter.start()
 
-  console.info('Twitter service running as AIRI module')
+  console.info('Twitter サービスが AIRI モジュールとして稼働中')
 }
 ```
 
-### 9.3 Using MCP for Integration
+### 9.3 MCP を使用した統合
 
 ```typescript
-// Use MCP SDK to interact with Twitter service
+// MCP SDK を使用して Twitter サービスとインタラクション
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 
 async function connectToTwitterService() {
-  // Create SSE transport
+  // SSE トランスポートの作成
   const transport = new SSEClientTransport('http://localhost:8080/sse', 'http://localhost:8080/messages')
 
-  // Create client
+  // クライアントの作成
   const client = new Client()
   await client.connect(transport)
 
-  // Get timeline
+  // タイムラインの取得
   const timeline = await client.get('twitter://timeline/10')
-  console.info('Timeline:', timeline.contents)
+  console.info('タイムライン:', timeline.contents)
 
-  // Use simplified login tool without parameters
+  // パラメータなしの簡略化ログインツールを使用
   const loginResult = await client.useTool('login', {})
-  console.info('Login result:', loginResult.content[0].text)
+  console.info('ログイン結果:', loginResult.content[0].text)
 
-  // Use refresh timeline tool to get latest tweets
+  // タイムライン更新ツールで最新のツイートを取得
   const refreshResult = await client.useTool('refresh-timeline', { count: 15, includeReplies: false })
-  console.info('Refresh result:', refreshResult.content[0].text)
-  console.info('New tweets:', refreshResult.resources)
+  console.info('更新結果:', refreshResult.content[0].text)
+  console.info('新着ツイート:', refreshResult.resources)
 
-  // Get user profile information
+  // ユーザープロフィール情報を取得
   const profileResult = await client.useTool('get-my-profile', { username: 'twitter' })
-  console.info('Profile info:', profileResult.content[0].text)
+  console.info('プロフィール情報:', profileResult.content[0].text)
 
-  // Use tool to send tweet
+  // ツールを使用してツイートを送信
   const result = await client.useTool('post-tweet', { content: 'Hello from MCP!' })
-  console.info('Result:', result.content)
+  console.info('結果:', result.content)
 
   return client
 }
 ```
 
-## 10. Extension Guide
+## 10. 拡張ガイド
 
-### 10.1 Adding New Features
+### 10.1 新機能の追加
 
-For example, adding "Get Tweets from a Specific User" functionality:
+例えば、「特定のユーザーからのツイートを取得する」機能を追加する場合：
 
-1. Extend the interface in `src/types/twitter.ts`
-2. Implement the method in `src/core/twitter-service.ts`
-3. Add corresponding handling logic in the adapter
-4. If it's an MCP adapter, add appropriate resources or tools in `configureServer()`
+1. `src/types/twitter.ts` にインターフェースを拡張
+2. `src/core/twitter-service.ts` にメソッドを実装
+3. アダプターに対応するハンドリングロジックを追加
+4. MCP アダプターの場合、`configureServer()` に適切なリソースまたはツールを追加
 
-### 10.2 Supporting New Adapters
+### 10.2 新しいアダプターのサポート
 
-1. Create a new adapter class
-2. Implement communication logic with the target system
-3. Add configuration support in the entry file
+1. 新しいアダプタークラスを作成
+2. ターゲットシステムとの通信ロジックを実装
+3. エントリファイルに設定サポートを追加
 
-## 11. Maintenance Recommendations
+## 11. メンテナンス推奨事項
 
-- **Automated Testing**: Write unit tests and integration tests
-- **Monitoring & Alerts**: Monitor service status and Twitter access limitations
-- **Selector Updates**: Regularly validate and update selector configurations
-- **Session Management**: Use the built-in session management system to improve stability and reduce manual login requirements. Consider implementing session rotation and validation.
-- **Cookie Management**: The system now automatically manages cookie storage via the SessionManager, but consider adding encrypted storage for production environments.
-- **User Feedback**: Maintain clear, internationalized feedback messages for authentication status to improve user experience.
+- **自動テスト**: ユニットテストと統合テストを記述
+- **監視とアラート**: サービスステータスと Twitter アクセス制限を監視
+- **セレクター更新**: セレクター設定を定期的に検証・更新
+- **セッション管理**: 組み込みのセッション管理システムを使用して安定性を向上し、手動ログイン要件を削減。セッションのローテーションとバリデーションの実装を検討。
+- **Cookie 管理**: システムは SessionManager を通じて Cookie ストレージを自動管理しますが、本番環境では暗号化ストレージの追加を検討してください。
+- **ユーザーフィードバック**: 認証状態に関する明確で国際化されたフィードバックメッセージを維持し、ユーザー体験を向上。
 
-### 11.4 Stagehand Maintenance
+### 11.4 Stagehand メンテナンス
 
-- **Model Selection**: Regularly evaluate the performance of different LLM models (GPT-4o, Claude 3.5 Sonnet) for your specific use cases
-- **Prompt Engineering**: Refine natural language instructions to improve reliability and performance
-- **Vision Capabilities**: Consider enabling vision capabilities for complex DOM structures by setting `useVision: true` in appropriate operations
-- **DOM Chunking**: Monitor and optimize chunk sizes based on the complexity of the Twitter interface
+- **モデル選択**: 特定のユースケースに対して異なる LLM モデル（GPT-4o、Claude 3.5 Sonnet）のパフォーマンスを定期的に評価
+- **プロンプトエンジニアリング**: 信頼性とパフォーマンスを向上するために自然言語の指示を改良
+- **ビジョン機能**: 複雑な DOM 構造に対して、適切な操作で `useVision: true` を設定してビジョン機能の有効化を検討
+- **DOM チャンキング**: Twitter インターフェースの複雑さに基づいてチャンクサイズを監視・最適化
 
-## 12. Project Roadmap
+## 12. プロジェクトロードマップ
 
-- MVP Stage: Core functionality with Stagehand integration (authentication, browsing timeline)
-- Stage Two: Enhanced interaction features utilizing Stagehand's natural language capabilities
-- Stage Three: Advanced search and filtering features with optimized LLM prompts
-- Stage Four: Performance optimization and multi-model support
+- MVP 段階: Stagehand 統合を伴うコア機能（認証、タイムライン閲覧）
+- 第二段階: Stagehand の自然言語機能を活用した強化されたインタラクション機能
+- 第三段階: 最適化された LLM プロンプトによる高度な検索とフィルタリング機能
+- 第四段階: パフォーマンス最適化とマルチモデルサポート

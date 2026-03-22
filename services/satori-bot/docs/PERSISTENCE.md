@@ -1,47 +1,47 @@
-## **Architecture Status Report: Memory & Persistence**
+## **アーキテクチャ状況報告：メモリと永続化**
 
-**Date:** March 6, 2026 (Refactored)
-**Component:** State Management Layer (Drizzle + PGlite)
+**日付:** 2026年3月6日（リファクタリング済み）
+**コンポーネント:** 状態管理層（Drizzle + PGlite）
 
-### **1. Memory Architecture (RAM)**
+### **1. メモリアーキテクチャ（RAM）**
 
-The bot utilizes a **Memory-First** strategy for active chat sessions, while persisting critical queue and message data to disk.
+Bot はアクティブなチャットセッションに対して **メモリファースト** 戦略を採用し、重要なキューとメッセージデータはディスクに永続化します。
 
-* **Storage Mechanism**: Active chat contexts are stored in a native `Map<string, ChatContext>` within the `BotContext` object (`src/core/types.ts`).
-* **Lifecycle Management**:
-    * **Creation**: Contexts are lazy-loaded via `ensureChatContext` in `src/core/session/context.ts` upon receiving a message.
-    * **Retention**: Currently, contexts remain in memory until process termination. History is trimmed during the loop.
-* **Context Trimming**:
-    * Executed within `handleLoopStep` in `src/core/loop/scheduler.ts`.
-    * Individual channels enforce strict limits: `MAX_ACTIONS_IN_CONTEXT = 50`, `ACTIONS_KEEP_ON_TRIM = 20`.
-    * Message history is dynamically fetched from the database (last 10 messages) to keep the LLM context lean.
+* **ストレージメカニズム**: アクティブなチャットコンテキストは `BotContext` オブジェクト（`src/core/types.ts`）内のネイティブ `Map<string, ChatContext>` に格納されます。
+* **ライフサイクル管理**:
+    * **作成**: コンテキストはメッセージ受信時に `src/core/session/context.ts` の `ensureChatContext` を介して遅延ロードされます。
+    * **保持**: 現在、コンテキストはプロセス終了までメモリに保持されます。履歴はループ中にトリミングされます。
+* **コンテキストトリミング**:
+    * `src/core/loop/scheduler.ts` の `handleLoopStep` 内で実行されます。
+    * 個々のチャネルは厳格な制限を適用します：`MAX_ACTIONS_IN_CONTEXT = 50`、`ACTIONS_KEEP_ON_TRIM = 20`。
+    * メッセージ履歴はデータベースから動的に取得され（直近 10 メッセージ）、LLM コンテキストを軽量に保ちます。
 
-### **2. Persistence Architecture (Database)**
+### **2. 永続化アーキテクチャ（データベース）**
 
-The bot has migrated from `lowdb` (JSON) to **PGlite** (PostgreSQL in WASM/Node) with **Drizzle ORM** for robust state management and high-performance I/O.
+Bot は `lowdb`（JSON）から **PGlite**（WASM/Node での PostgreSQL）+ **Drizzle ORM** に移行し、堅牢な状態管理と高性能 I/O を実現しています。
 
-* **Technology**: [PGlite](https://pglite.dev/) + [Drizzle ORM](https://orm.drizzle.team/).
-* **Location**: `data/` directory (configured via `DB_PATH` in `.env.local`).
-* **Schema (`src/lib/schema.ts`)**:
-    * `channels`: Metadata for discovered channels (ID, name, platform, self_id).
-    * `messages`: Persistent message log with indexing on `channel_id` and `timestamp`.
-    * `event_queue`: Persistent queue for incoming Satori events awaiting processing.
-    * `unread_events`: Persistent store for events marked as unread for each channel.
-* **Optimized I/O Strategy**:
-    * **Incremental Updates**: Unlike the previous "full-rewrite" approach, the bot now uses targeted SQL operations.
-    * **Queue Management**: Individual items are added (`pushToEventQueue`) and removed (`removeFromEventQueue`) by ID.
-    * **Unread Tracking**: Unread messages are persisted incrementally (`pushToUnreadEvents`) and cleared per channel (`clearUnreadEventsForChannel`).
-* **Migrations**: Managed via `drizzle-kit`. Migrations are automatically applied on startup in `src/lib/db.ts`.
+* **技術**: [PGlite](https://pglite.dev/) + [Drizzle ORM](https://orm.drizzle.team/)。
+* **場所**: `data/` ディレクトリ（`.env.local` の `DB_PATH` で設定）。
+* **スキーマ（`src/lib/schema.ts`）**:
+    * `channels`: 検出されたチャネルのメタデータ（ID、名前、プラットフォーム、self_id）。
+    * `messages`: `channel_id` と `timestamp` にインデックスが設定された永続メッセージログ。
+    * `event_queue`: 処理待ちの受信 Satori イベントの永続キュー。
+    * `unread_events`: 各チャネルの未読イベントの永続ストア。
+* **最適化された I/O 戦略**:
+    * **インクリメンタル更新**: 以前の「全書き換え」アプローチとは異なり、Bot はターゲットを絞った SQL 操作を使用します。
+    * **キュー管理**: 個々のアイテムが ID によって追加（`pushToEventQueue`）および削除（`removeFromEventQueue`）されます。
+    * **未読追跡**: 未読メッセージはインクリメンタルに永続化（`pushToUnreadEvents`）され、チャネルごとにクリア（`clearUnreadEventsForChannel`）されます。
+* **マイグレーション**: `drizzle-kit` で管理されます。マイグレーションは `src/lib/db.ts` で起動時に自動適用されます。
 
-### **3. State Consistency & Recovery**
+### **3. 状態の一貫性とリカバリ**
 
-The gap between ephemeral memory and persistent disk state has been significantly narrowed.
+一時的なメモリと永続ディスク状態のギャップは大幅に縮小されました。
 
-* **Durable Queue**: The `eventQueue` and `unreadEvents` are fully persisted. If the bot crashes, it resumes processing the queue from where it left off.
-* **Message History**: The LLM's conversation history is reconstructed from the indexed `messages` table in the database, ensuring continuity across restarts.
-* **Hard Reset Mitigation**: While `AbortController` handles are still lost on restart, the core task queue and conversation context remain intact.
+* **耐久性のあるキュー**: `eventQueue` と `unreadEvents` は完全に永続化されています。Bot がクラッシュした場合、中断した場所からキューの処理を再開します。
+* **メッセージ履歴**: LLM の会話履歴はデータベースのインデックス付き `messages` テーブルから再構築され、再起動後の継続性を保証します。
+* **ハードリセット軽減**: `AbortController` ハンドルは再起動時に失われますが、コアタスクキューと会話コンテキストは保持されます。
 
-### **4. Configuration**
+### **4. 設定**
 
-Database settings are managed through `src/config.ts`:
-* `DB_PATH`: Path to the PGlite data directory (default: `data/pglite-db`).
+データベース設定は `src/config.ts` で管理されます：
+* `DB_PATH`: PGlite データディレクトリへのパス（デフォルト: `data/pglite-db`）。

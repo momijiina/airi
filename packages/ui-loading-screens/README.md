@@ -1,11 +1,11 @@
 # @proj-airi/ui-loading-screens
 
 <p align="center">
-  [<a href="https://proj-airi-packages-ui-loading-screens.netlify.app/">Try it</a>]
+  [<a href="https://proj-airi-packages-ui-loading-screens.netlify.app/">試してみる</a>]
 </p>
 
-The loading screens to show during long-time application startups.
+アプリケーションの長時間起動時に表示するローディング画面。
 
-## License
+## ライセンス
 
 [MIT](../../LICENSE)
