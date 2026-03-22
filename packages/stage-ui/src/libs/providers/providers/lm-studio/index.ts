@@ -23,7 +23,7 @@ export const providerLmStudio = defineProvider<LMStudioConfig>({
   nameLocalize: ({ t }) => t('settings.pages.providers.provider.lm-studio.title'),
   description: 'LM Studio',
   descriptionLocalize: ({ t }) => t('settings.pages.providers.provider.lm-studio.description'),
-  tasks: ['chat'],
+  tasks: ['chat', 'embed'],
   icon: 'i-lobe-icons:lmstudio',
   iconColor: 'i-lobe-icons:lmstudio',
 

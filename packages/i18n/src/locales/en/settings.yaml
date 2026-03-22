@@ -794,6 +794,12 @@ pages:
       lm-studio:
         description: lmstudio.ai
         title: LM Studio
+        setup-guide:
+          title: How to connect to LM Studio
+          step1: Download and install LM Studio from lmstudio.ai
+          step2: Load a model in LM Studio (e.g. from the Discover tab)
+          step3: "Go to the Developer tab and start the local server (default: http://localhost:1234)"
+          step4: Enable CORS in the server settings if connecting from a browser
       vllm:
         description: vllm.ai
         title: vLLM

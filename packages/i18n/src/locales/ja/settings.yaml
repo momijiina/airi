@@ -763,6 +763,12 @@ pages:
       lm-studio:
         description: lmstudio.ai
         title: LM Studio
+        setup-guide:
+          title: LM Studioとの接続方法
+          step1: lmstudio.ai から LM Studio をダウンロードしてインストール
+          step2: LM Studio でモデルを読み込む（例：Discoverタブから）
+          step3: Developerタブでローカルサーバーを起動（デフォルト：http://localhost:1234）
+          step4: ブラウザから接続する場合は、サーバー設定でCORSを有効にする
       vllm:
         description: vllm.ai
         title: vLLM
