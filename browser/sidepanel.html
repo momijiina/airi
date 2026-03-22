@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airi Browser</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-title">
+        <span class="logo">🤖</span>
+        <h1>Airi Browser</h1>
+      </div>
+      <div class="header-status" id="connectionStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">未接続</span>
+      </div>
+    </header>
+
+    <div class="model-bar" id="modelBar">
+      <label class="model-label">モデル:</label>
+      <select id="modelSelect">
+        <option value="" disabled selected>-- 読み込み中 --</option>
+      </select>
+    </div>
+
+    <div class="log-area" id="logArea">
+      <div class="welcome-message">
+        <p>🌐 AIブラウザパイロットへようこそ！</p>
+        <p>タスクを入力してAIにブラウザ操作を任せましょう。</p>
+        <p class="hint">例: 「Googleで猫の画像を検索して」</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="status-bar" id="statusBar" style="display:none;">
+        <span class="spinner"></span>
+        <span id="statusMessage"></span>
+      </div>
+      <div class="input-row">
+        <textarea 
+          id="taskInput" 
+          placeholder="AIに実行してほしいタスクを入力..." 
+          rows="2"
+        ></textarea>
+        <button id="sendBtn" class="btn-primary" title="実行">
+          ▶
+        </button>
+        <button id="stopBtn" class="btn-danger" title="停止" style="display:none;">
+          ⏹
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Airi Browser Bridge",
+  "version": "1.0.0",
+  "description": "Airiアプリと連携してブラウザを自動操作するブリッジ拡張機能",
+  "permissions": ["tabs", "activeTab", "scripting", "storage", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html" }
+}
