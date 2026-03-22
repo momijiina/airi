@@ -25,7 +25,7 @@ async function bridgeRequest(path: string, body: Record<string, unknown>): Promi
 const tools = [
   tool({
     name: 'web_search',
-    description: 'Search the web using a browser. Use this when you need to look up current information, find facts, or research topics you are unsure about. Returns search results with titles, URLs, and page text.',
+    description: 'Search the web using a browser. Use this when you need to look up current information, find facts, or research topics you are unsure about. Returns search results with titles, URLs, and page text. Always search in Japanese (日本語) unless the user explicitly asks for another language.',
     execute: async ({ query, engine }) => {
       try {
         const result = await bridgeRequest('/api/search', { query, engine }) as Record<string, unknown>
@@ -48,6 +48,7 @@ const tools = [
         if (result.text)
           output += `### Page content:\n${(result.text as string).slice(0, 3000)}\n`
 
+        output += '\n---\nYou now have search results. Please summarize the information and answer the user\'s question in the same language the user used. Do NOT call more tools unless absolutely necessary.'
         return output
       }
       catch (error) {
@@ -60,7 +61,7 @@ const tools = [
     },
     parameters: z.object({
       query: z.string().describe('The search query to look up on the web'),
-      engine: z.enum(['bing', 'google', 'duckduckgo']).optional().default('bing').describe('Search engine to use (default: bing)'),
+      engine: z.enum(['google', 'bing', 'duckduckgo']).optional().default('google').describe('Search engine to use (default: google)'),
     }),
   }),
   tool({
@@ -80,7 +81,8 @@ const tools = [
         if (result.text)
           output += `${(result.text as string).slice(0, 4000)}\n`
 
-        return output || 'No content extracted from page.'
+        const pageContent = output || 'No content extracted from page.'
+        return `${pageContent}\n---\nYou now have the page content. Please summarize the information and answer the user's question in the same language the user used. Do NOT call more tools unless absolutely necessary.`
       }
       catch (error) {
         const message = error instanceof Error ? error.message : String(error)

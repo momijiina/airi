@@ -49,7 +49,14 @@ function sanitizeMessages(messages: unknown[]): Message[] {
 }
 
 function streamOptionsToolsCompatibilityOk(model: string, chatProvider: ChatProvider, _: Message[], options?: StreamOptions): boolean {
-  return !!(options?.supportsTools || options?.toolsCompatibility?.get(`${chatProvider.chat(model).baseURL}-${model}`))
+  // NOTICE: For local providers (LM Studio, Ollama), always enable tools since they handle
+  // function calling at the API level regardless of model capability.
+  const baseURL = chatProvider.chat(model).baseURL ?? ''
+  if (baseURL.includes('localhost') || baseURL.includes('127.0.0.1')) {
+    return true
+  }
+
+  return !!(options?.supportsTools || options?.toolsCompatibility?.get(`${baseURL}-${model}`))
 }
 
 async function streamFrom(model: string, chatProvider: ChatProvider, messages: Message[], options?: StreamOptions) {
@@ -110,7 +117,7 @@ async function streamFrom(model: string, chatProvider: ChatProvider, messages: M
     try {
       streamText({
         ...chatConfig,
-        maxSteps: 10,
+        maxSteps: 3,
         messages: sanitized,
         headers,
         // TODO: we need Automatic tools discovery
