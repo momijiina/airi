@@ -225,6 +225,8 @@
   - [ ] [Helldivers 2](https://www.playstation.com/en-hk/games/helldivers-2/pc/) を協力プレイ（WIP）
   - [x] [Telegram](https://telegram.org) でチャット
   - [x] [Discord](https://discord.com) でチャット
+  - [x] ウェブ検索（Google / Bing / DuckDuckGo）
+  - [x] ブラウザ自律操作（Chrome拡張機能経由）
   - [ ] メモリ
     - [x] ブラウザ内データベースサポート（DuckDB WASM | `pglite`）
     - [ ] Memory Alaya（WIP）
@@ -316,6 +318,25 @@ sudo pnpm dev:tamagotchi
 pnpm dev:docs
 ```
 
+### ブラウザ検索機能（Chrome拡張機能 + ブリッジサーバー）
+
+AIRIがウェブ検索やブラウザ操作を行うための機能です。3つのコンポーネントで構成されています：
+
+1. **ブリッジサーバー起動**（AIRI フロントエンドとChrome拡張機能の橋渡し）
+
+```shell
+node browser-bridge/server.mjs
+# または
+start-bridge-server.bat
+```
+
+2. **Chrome拡張機能をインストール**
+   - Chromeで `chrome://extensions` を開く
+   - 「デベロッパーモード」を有効にする
+   - 「パッケージ化されていない拡張機能を読み込む」→ `browser-bridge/` フォルダを選択
+
+3. **AIRI Web UIを起動** — チャットでAIに検索を依頼すると、自動的にブラウザ経由で検索・情報取得を行います
+
 ### リリース
 
 `bumpp` 実行後に `Cargo.toml` のバージョンも更新してください：
@@ -331,6 +352,7 @@ npx bumpp --no-commit --no-tag
 - [x] [vLLM](https://github.com/vllm-project/vllm)
 - [x] [SGLang](https://github.com/sgl-project/sglang)
 - [x] [Ollama](https://github.com/ollama/ollama)
+- [x] [LM Studio](https://lmstudio.ai/)
 - [x] [302.AI (sponsored)](https://share.302.ai/514k2v)
 - [x] [OpenAI](https://platform.openai.com/docs/guides/gpt/chat-completions-api)
   - [ ] [Azure OpenAI API](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference) (PR welcome)
