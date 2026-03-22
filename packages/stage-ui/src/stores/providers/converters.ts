@@ -16,6 +16,9 @@ function getCategoryFromTasks(tasks: string[]): ProviderMetadata['category'] {
   if (tasks.some(task => ['text-to-speech', 'speech', 'tts'].includes(task.toLowerCase()))) {
     return 'speech'
   }
+  if (tasks.some(task => ['chat'].includes(task.toLowerCase()))) {
+    return 'chat'
+  }
   if (tasks.some(task => ['embed', 'embedding'].includes(task.toLowerCase()))) {
     return 'embed'
   }
