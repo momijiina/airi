@@ -4,6 +4,7 @@ import type { ChatAssistantMessage, ChatHistoryItem, ContextMessage } from '../.
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ChatAlarmBanner from './alarm-banner.vue'
 import ChatAssistantItem from './assistant-item.vue'
 import ChatErrorItem from './error-item.vue'
 import ChatUserItem from './user-item.vue'
@@ -102,5 +103,7 @@ const renderMessages = computed<ChatHistoryItem[]>(() => {
         />
       </div>
     </template>
+
+    <ChatAlarmBanner />
   </div>
 </template>
