@@ -117,7 +117,7 @@ async function streamFrom(model: string, chatProvider: ChatProvider, messages: M
     try {
       streamText({
         ...chatConfig,
-        maxSteps: 3,
+        maxSteps: 10,
         messages: sanitized,
         headers,
         // TODO: we need Automatic tools discovery

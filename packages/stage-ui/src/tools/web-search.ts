@@ -48,7 +48,7 @@ const tools = [
         if (result.text)
           output += `### Page content:\n${(result.text as string).slice(0, 3000)}\n`
 
-        output += '\n---\nYou now have search results. Please summarize the information and answer the user\'s question in the same language the user used. Do NOT call more tools unless absolutely necessary.'
+        output += '\n---\nIf this information is sufficient to answer the user\'s question, summarize and respond in the same language the user used. If not, browse specific result URLs with web_browse to gather more details.'
         return output
       }
       catch (error) {
@@ -82,7 +82,7 @@ const tools = [
           output += `${(result.text as string).slice(0, 4000)}\n`
 
         const pageContent = output || 'No content extracted from page.'
-        return `${pageContent}\n---\nYou now have the page content. Please summarize the information and answer the user's question in the same language the user used. Do NOT call more tools unless absolutely necessary.`
+        return `${pageContent}\n---\nYou have read this page. If you now have enough information to answer the user's question, summarize and respond in the same language the user used. Otherwise, browse additional URLs or search again with different terms.`
       }
       catch (error) {
         const message = error instanceof Error ? error.message : String(error)
