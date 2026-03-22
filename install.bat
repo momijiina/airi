@@ -1,78 +1,96 @@
 @echo off
-chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 echo ============================================
-echo   Project AIRI - 初回セットアップ
+echo   Project AIRI - Setup
 echo ============================================
 echo.
 
-:: ---- Node.js チェック ----
+REM ---- Node.js check ----
 where node >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [エラー] Node.js が見つかりません。
-    echo https://nodejs.org/ からインストールしてください。
-    echo.
+    echo [ERROR] Node.js not found.
+    echo Please install from https://nodejs.org/
     pause
     exit /b 1
 )
 
 for /f "tokens=*" %%v in ('node -v') do set NODE_VER=%%v
-echo [OK] Node.js %NODE_VER% を検出しました。
+echo [OK] Node.js %NODE_VER%
 
-:: ---- corepack で pnpm を有効化 ----
+REM ---- pnpm setup ----
 echo.
-echo pnpm をセットアップしています...
-call corepack enable 2>nul
-if %errorlevel% neq 0 (
-    echo [警告] corepack enable に失敗しました。管理者権限で再試行してください。
-    echo 手動で実行: corepack enable
-    echo.
-)
+echo Setting up pnpm...
 
-call corepack prepare --activate 2>nul
-
-:: ---- pnpm チェック ----
 where pnpm >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [情報] pnpm が PATH にありません。npm でインストールを試みます...
-    call npm install -g pnpm@latest
-    where pnpm >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo [エラー] pnpm のインストールに失敗しました。
-        echo 手動でインストールしてください: npm install -g pnpm
-        pause
-        exit /b 1
-    )
-)
+if %errorlevel% equ 0 goto pnpm_found
 
+call corepack enable >nul 2>&1
+call corepack prepare --activate >nul 2>&1
+where pnpm >nul 2>&1
+if %errorlevel% equ 0 goto pnpm_found
+
+call npx pnpm --version >nul 2>&1
+if %errorlevel% equ 0 goto pnpm_npx
+
+echo [INFO] Installing pnpm via npm...
+call npm install -g pnpm@latest >nul 2>&1
+where pnpm >nul 2>&1
+if %errorlevel% equ 0 goto pnpm_found
+
+echo [ERROR] Failed to install pnpm.
+echo Run as Administrator:
+echo   corepack enable
+echo   corepack prepare pnpm@latest --activate
+pause
+exit /b 1
+
+:pnpm_found
 for /f "tokens=*" %%v in ('pnpm --version') do set PNPM_VER=%%v
-echo [OK] pnpm %PNPM_VER% を検出しました。
+echo [OK] pnpm %PNPM_VER%
+goto do_install
 
-:: ---- 依存関係インストール ----
+:pnpm_npx
+for /f "tokens=*" %%v in ('npx pnpm --version') do set PNPM_VER=%%v
+echo [OK] pnpm %PNPM_VER% (via npx)
+goto do_install_npx
+
+:do_install
 echo.
 echo ============================================
-echo   依存関係をインストールしています...
-echo   （初回は時間がかかります）
+echo   Installing dependencies...
 echo ============================================
 echo.
-
 call pnpm install
 if %errorlevel% neq 0 (
-    echo.
-    echo [エラー] pnpm install に失敗しました。
-    echo ログを確認してください。
+    echo [ERROR] pnpm install failed.
     pause
     exit /b 1
 )
+goto done
 
+:do_install_npx
 echo.
 echo ============================================
-echo   セットアップ完了！
+echo   Installing dependencies...
 echo ============================================
 echo.
-echo 次のバッチファイルでアプリを起動できます:
-echo   start-web.bat       ... Web版を起動
-echo   start-desktop.bat   ... デスクトップ版（Electron）を起動
+call npx pnpm install
+if %errorlevel% neq 0 (
+    echo [ERROR] pnpm install failed.
+    pause
+    exit /b 1
+)
+goto done
+
+:done
+echo.
+echo ============================================
+echo   Setup complete!
+echo ============================================
+echo.
+echo Start the app with:
+echo   start-web.bat       ... Web version
+echo   start-desktop.bat   ... Desktop version (Electron)
 echo.
 pause
