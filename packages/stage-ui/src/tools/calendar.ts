@@ -8,7 +8,7 @@ import { useCalendarStore } from '../stores/calendar'
  * イベントの追加・一覧・削除・表示をチャットから実行できる
  */
 export async function calendar() {
-  return [
+  return Promise.all([
     tool({
       name: 'open_calendar',
       description: 'Open the calendar UI dialog. Use this when the user asks to open, show, or view the calendar. Examples: "カレンダーを開いて", "カレンダー見せて", "予定を見たい", "show calendar", "open calendar".',
@@ -100,5 +100,5 @@ export async function calendar() {
         id: z.string().describe('The ID of the calendar event to remove'),
       }),
     }),
-  ]
+  ])
 }

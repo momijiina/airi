@@ -1,13 +1,18 @@
+import type { ChatProvider } from '@xsai/providers'
+
 import { nanoid } from 'nanoid'
 import { onUnmounted, ref } from 'vue'
 
 import { useCalendarStore } from '../stores/calendar'
+import { useChatOrchestratorStore } from '../stores/chat'
 import { useChatSessionStore } from '../stores/chat/session-store'
+import { useConsciousnessStore } from '../stores/modules/consciousness'
+import { useProvidersStore } from '../stores/providers'
 
 /**
  * Airiの予定実行スケジューラ
  * 60秒ごとにカレンダーの予定をチェックし、実行時間が来たAiriの予定を
- * チャットメッセージとして通知する
+ * AIに実行させる（userメッセージとして送信）か、通知する
  */
 export function useCalendarScheduler() {
   const executedToday = ref(new Set<string>())
@@ -31,8 +36,13 @@ export function useCalendarScheduler() {
           calendarStore.markExecuted(event.id)
         }
 
-        // チャットにメッセージを追加
-        addScheduleMessage(event.title, event.description, event.startTime)
+        // Airiの予定はAIに実行させる
+        if (event.owner === 'airi') {
+          executeAiriEvent(event.title, event.description, event.startTime)
+        }
+        else {
+          addNotificationMessage(event.title, event.description, event.startTime)
+        }
       }
     }
     catch {
@@ -40,7 +50,44 @@ export function useCalendarScheduler() {
     }
   }
 
-  function addScheduleMessage(title: string, description: string, time: string) {
+  /**
+   * Airiの予定をAIに実行させるためにuserメッセージとして送信
+   */
+  async function executeAiriEvent(title: string, description: string, time: string) {
+    try {
+      const consciousness = useConsciousnessStore()
+      const providersStore = useProvidersStore()
+      const chatOrchestrator = useChatOrchestratorStore()
+
+      const providerId = consciousness.activeProvider
+      const model = consciousness.activeModel
+      if (!providerId || !model)
+        return
+
+      const chatProvider = await providersStore.getProviderInstance<ChatProvider>(providerId)
+      const providerConfig = providersStore.getProviderConfig(providerId)
+
+      // AIに予定の内容を実行させるプロンプトを送信
+      const prompt = description
+        ? `[カレンダー予定] ${time}の予定「${title}」を実行してください: ${description}`
+        : `[カレンダー予定] ${time}の予定「${title}」を実行してください`
+
+      await chatOrchestrator.ingest(prompt, {
+        chatProvider,
+        model,
+        providerConfig,
+      })
+    }
+    catch {
+      // フォールバック: AIに送信できない場合は通知だけ
+      addNotificationMessage(title, description, time)
+    }
+  }
+
+  /**
+   * チャットに通知メッセージを追加（ユーザー予定など）
+   */
+  function addNotificationMessage(title: string, description: string, time: string) {
     try {
       const chatSession = useChatSessionStore()
       const sessionId = chatSession.activeSessionId
