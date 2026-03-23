@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import HeaderAvatar from './HeaderAvatar.vue'
 import HeaderLink from './HeaderLink.vue'
 import ActionAbout from './InteractiveArea/Actions/About.vue'
+import ActionCalendar from './InteractiveArea/Actions/Calendar.vue'
 
 const router = useRouter()
 
@@ -18,6 +19,7 @@ function handleNavigation() {
     <HeaderLink />
     <div flex items-center gap-2>
       <ProfileSwitcherPopover @create="handleNavigation" @manage="handleNavigation" />
+      <ActionCalendar />
       <ActionAbout />
       <HeaderAvatar />
     </div>

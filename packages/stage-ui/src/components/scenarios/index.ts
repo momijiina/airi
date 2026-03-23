@@ -1,4 +1,5 @@
 export * from './about'
+export * from './calendar'
 export * from './chat'
 export * from './dialogs'
 export * from './providers'

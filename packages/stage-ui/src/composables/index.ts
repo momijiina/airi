@@ -1,4 +1,5 @@
 export * from './audio'
+export * from './calendar-scheduler'
 export * from './canvas-alpha'
 export * from './llm-marker-parser'
 export * from './markdown'

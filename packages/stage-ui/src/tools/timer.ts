@@ -98,6 +98,8 @@ async function sendNotification(title: string, body: string) {
       await Notification.requestPermission()
     }
     if (Notification.permission === 'granted') {
+      // NOTICE: Notification constructor is used for side effect (showing browser notification)
+      // eslint-disable-next-line no-new
       new Notification(title, { body, icon: '/favicon.ico' })
     }
   }
@@ -135,7 +137,7 @@ function formatDuration(totalSeconds: number): string {
 const tools = [
   tool({
     name: 'set_timer',
-    description: 'Set a countdown timer. When the timer expires, the user will be notified with a sound and browser notification. Use this when the user asks to set a timer, countdown, or wants to be reminded after a certain duration.',
+    description: 'Set a countdown timer. When the timer expires, the user will be notified with a sound and browser notification. Use this when the user asks to set a timer, countdown, or wants to be reminded after a certain duration. Examples: "5分タイマー", "3分後に教えて", "set a 10 minute timer", "タイマーを設定して".',
     execute: async ({ hours, minutes, seconds, label }) => {
       const totalMs = ((hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0)) * 1000
       if (totalMs <= 0) {
@@ -167,7 +169,7 @@ const tools = [
   }),
   tool({
     name: 'set_alarm',
-    description: 'Set an alarm for a specific time today (or tomorrow if the time has already passed). The user will be notified with a sound and browser notification when the alarm goes off. Use when the user asks to be woken up or notified at a specific time.',
+    description: 'Set an alarm for a specific time today (or tomorrow if the time has already passed). The user will be notified with a sound and browser notification when the alarm goes off. Use when the user asks to set an alarm, be woken up, or notified at a specific time. Examples: "7時にアラームを設定して", "朝6時に起こして", "set alarm for 7am", "8:30にアラーム".',
     execute: async ({ hour, minute, label }) => {
       const now = new Date()
       const alarm = new Date(now)
