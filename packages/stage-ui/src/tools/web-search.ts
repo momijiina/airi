@@ -26,7 +26,7 @@ const KNOWN_TLDS = ['org', 'com', 'net', 'jp', 'io', 'dev', 'co', 'info', 'edu',
  * - Bogus punycode hostnames (LLM merged domain+path into one label)
  * - Double-encoded characters (`%2520` → `%20` → space)
  */
-function normalizeUrl(rawUrl: unknown): string {
+function normalizeUrl(rawUrl: unknown): string | null {
   // NOTICE: LLMs sometimes pass a number (e.g., 1) instead of a string ("1")
   // when using the reference system. Coerce to string to avoid .trim() crash.
   let url = String(rawUrl ?? '').trim()
@@ -37,6 +37,10 @@ function normalizeUrl(rawUrl: unknown): string {
     const cached = searchResultUrlCache.get(Number(refMatch[1]))
     if (cached)
       return cached
+    // NOTICE: If the number doesn't match any cached URL, return null instead
+    // of passing a bare number like "1" to the browser — that would resolve
+    // to chrome-extension://…/1 in the extension context.
+    return null
   }
 
   // Fix double-encoding: %25XX → %XX
@@ -159,6 +163,10 @@ const tools = [
     description: 'Navigate to a URL and extract its text content. PREFERRED: Pass the reference number from web_search results (e.g., url: "1") to avoid URL encoding errors. Also accepts a full URL. Call this multiple times to read several pages for thorough research.',
     execute: async ({ url: rawUrl }) => {
       const url = normalizeUrl(rawUrl)
+      if (!url) {
+        const available = [...searchResultUrlCache.entries()].map(([k, v]) => `[${k}] ${v}`).join('\n')
+        return `Invalid URL reference: "${rawUrl}". ${available ? `Available references:\n${available}` : 'No cached search results. Run web_search first, then use the result number.'}`
+      }
       try {
         const result = await bridgeRequest('/api/navigate', { url }, NAVIGATE_TIMEOUT_MS) as Record<string, unknown>
         if (result.error) {
