@@ -37,6 +37,11 @@ const resolvedSlices = computed<ChatSlices[]>(() => {
 })
 
 const showLoader = computed(() => props.showPlaceholder && resolvedSlices.value.length === 0)
+// NOTICE: Show a trailing loader when the assistant is still streaming (showPlaceholder)
+// but already has tool-call slices. Without this, the chat appears frozen while
+// web_search/web_browse tools execute because the three-dot loader only showed
+// when there were zero slices.
+const showTrailingLoader = computed(() => props.showPlaceholder && resolvedSlices.value.length > 0)
 const containerClass = computed(() => props.variant === 'mobile' ? 'mr-0' : 'mr-12')
 const boxClasses = computed(() => [
   props.variant === 'mobile' ? 'px-2 py-2 text-sm bg-primary-50/90 dark:bg-primary-950/90' : 'px-3 py-3 bg-primary-50/80 dark:bg-primary-950/80',
@@ -68,6 +73,7 @@ const boxClasses = computed(() => [
         </template>
       </div>
       <div v-else-if="showLoader" i-eos-icons:three-dots-loading />
+      <div v-if="showTrailingLoader" i-eos-icons:three-dots-loading mt-1 />
 
       <ChatResponsePart
         v-if="message.categorization"

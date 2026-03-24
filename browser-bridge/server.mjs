@@ -19,7 +19,12 @@ const PORT = Number(process.env.AIRI_BRIDGE_PORT) || 3001
 const CORS_ORIGIN = process.env.AIRI_CORS_ORIGIN || '*'
 
 // コマンドキューと結果マップ
-let pendingCommand = null
+// NOTICE: Changed from single `pendingCommand` variable to a proper FIFO queue.
+// The old single-variable approach caused commands to be overwritten when multiple
+// tool calls arrived concurrently (e.g., web_search followed by 3x web_browse).
+// The extension would only receive the LAST command; earlier ones were lost and
+// timed out after 60s, causing the chat to freeze and then "burst" when retried.
+const commandQueue = []
 const resultWaiters = new Map() // id -> { resolve, timer }
 let commandIdCounter = 0
 
@@ -91,8 +96,8 @@ const server = createServer(async (req, res) => {
         resultWaiters.set(id, { resolve, timer })
       })
 
-      pendingCommand = cmd
-      console.log(`[search] query="${query}" engine=${engine} id=${id}`)
+      commandQueue.push(cmd)
+      console.info(`[search] query="${query}" engine=${engine} id=${id} queue=${commandQueue.length}`)
 
       const result = await resultPromise
       jsonResponse(res, result)
@@ -124,8 +129,8 @@ const server = createServer(async (req, res) => {
         resultWaiters.set(id, { resolve, timer })
       })
 
-      pendingCommand = cmd
-      console.log(`[navigate] url="${targetUrl}" id=${id}`)
+      commandQueue.push(cmd)
+      console.info(`[navigate] url="${targetUrl}" id=${id} queue=${commandQueue.length}`)
 
       const result = await resultPromise
       jsonResponse(res, result)
@@ -142,9 +147,8 @@ const server = createServer(async (req, res) => {
 
   // ロングポーリング: 拡張がコマンドを取得
   if (path === '/api/ext-bridge/poll' && req.method === 'GET') {
-    if (pendingCommand) {
-      const cmd = pendingCommand
-      pendingCommand = null
+    if (commandQueue.length > 0) {
+      const cmd = commandQueue.shift()
       jsonResponse(res, cmd)
     }
     else {
@@ -155,11 +159,10 @@ const server = createServer(async (req, res) => {
 
       // 新しいコマンドが来たら即座に返す
       const checkInterval = setInterval(() => {
-        if (pendingCommand) {
+        if (commandQueue.length > 0) {
           clearTimeout(timer)
           clearInterval(checkInterval)
-          const cmd = pendingCommand
-          pendingCommand = null
+          const cmd = commandQueue.shift()
           jsonResponse(res, cmd)
         }
       }, 100)
@@ -197,7 +200,7 @@ const server = createServer(async (req, res) => {
     jsonResponse(res, {
       status: 'ok',
       name: 'Airi Browser Bridge Server',
-      pending: !!pendingCommand,
+      pending: commandQueue.length,
       waiters: resultWaiters.size,
     })
     return
@@ -208,10 +211,10 @@ const server = createServer(async (req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`Airi Browser Bridge Server listening on http://localhost:${PORT}`)
-  console.log(`  POST /api/search        - Web検索リクエスト`)
-  console.log(`  POST /api/navigate      - ページ取得リクエスト`)
-  console.log(`  GET  /api/ext-bridge/poll   - 拡張ポーリング`)
-  console.log(`  POST /api/ext-bridge/result - 拡張結果返却`)
-  console.log(`  GET  /api/ext-bridge/status - ステータス確認`)
+  console.info(`Airi Browser Bridge Server listening on http://localhost:${PORT}`)
+  console.info(`  POST /api/search        - Web検索リクエスト`)
+  console.info(`  POST /api/navigate      - ページ取得リクエスト`)
+  console.info(`  GET  /api/ext-bridge/poll   - 拡張ポーリング`)
+  console.info(`  POST /api/ext-bridge/result - 拡張結果返却`)
+  console.info(`  GET  /api/ext-bridge/status - ステータス確認`)
 })

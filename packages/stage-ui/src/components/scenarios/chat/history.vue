@@ -49,7 +49,14 @@ watch(() => props.sending, scrollToBottom, { flush: 'post' })
 onMounted(scrollToBottom)
 
 const streaming = computed<ChatAssistantMessage & { context?: ContextMessage } & { createdAt?: number }>(() => props.streamingMessage ?? { role: 'assistant', content: '', slices: [], tool_results: [], createdAt: Date.now() })
-const showStreamingPlaceholder = computed(() => (streaming.value.slices?.length ?? 0) === 0 && !streaming.value.content)
+// NOTICE: Show placeholder (loading dots) when the streaming message has no text yet.
+// Tool-call-only slices don't count as visible content — the user needs to see
+// that the assistant is still working (e.g., during web_search / web_browse execution).
+const showStreamingPlaceholder = computed(() => {
+  const slices = streaming.value.slices ?? []
+  const hasTextContent = slices.some(s => s.type === 'text' && (s as { text?: string }).text?.trim())
+  return !hasTextContent && !streaming.value.content
+})
 const streamingTs = computed(() => streaming.value?.createdAt)
 function shouldShowPlaceholder(message: ChatHistoryItem) {
   const ts = streamingTs.value
