@@ -9,6 +9,38 @@ const SEARCH_TIMEOUT_MS = 20_000
 const NAVIGATE_TIMEOUT_MS = 25_000
 
 /**
+ * Normalize a URL that the LLM may have garbled.
+ * Common issues:
+ * - Percent-encoded characters in the domain (e.g., `%20` → space → remove)
+ * - Broken punycode (`xn--` prefix with encoded spaces)
+ * - Double-encoded characters (`%2520` → `%20` → space)
+ */
+function normalizeUrl(rawUrl: string): string {
+  let url = rawUrl.trim()
+
+  // Fix double-encoding: %25XX → %XX
+  url = url.replace(/%25([0-9A-F]{2})/gi, '%$1')
+
+  // Decode percent-encoded characters in the URL so we can inspect it
+  try {
+    const parsed = new URL(url)
+    // Decode hostname: percent-encoded domains are invalid
+    // e.g., "wikiwiki.xn--jp%20%20aogiri..." → likely "wikiwiki.jp"
+    if (parsed.hostname.includes('%')) {
+      parsed.hostname = decodeURIComponent(parsed.hostname).replace(/\s+/g, '')
+    }
+    // Strip spaces from hostname (LLM sometimes injects them)
+    parsed.hostname = parsed.hostname.replace(/\s+/g, '')
+
+    return parsed.toString()
+  }
+  catch {
+    // If URL parsing fails, try basic cleanup
+    return url.replace(/\s+/g, '')
+  }
+}
+
+/**
  * browser-bridge サーバーにリクエストを送信するヘルパー
  */
 async function bridgeRequest(path: string, body: Record<string, unknown>, timeoutMs?: number): Promise<unknown> {
@@ -73,7 +105,8 @@ const tools = [
   tool({
     name: 'web_browse',
     description: 'Navigate to a specific URL and extract its full text content. You SHOULD use this after web_search to read the actual pages from search results. Also use to visit any known URL. Call this multiple times to read several pages for thorough research.',
-    execute: async ({ url }) => {
+    execute: async ({ url: rawUrl }) => {
+      const url = normalizeUrl(rawUrl)
       try {
         const result = await bridgeRequest('/api/navigate', { url }, NAVIGATE_TIMEOUT_MS) as Record<string, unknown>
         if (result.error) {
@@ -99,7 +132,7 @@ const tools = [
       }
     },
     parameters: z.object({
-      url: z.string().url().describe('The URL to navigate to and extract content from'),
+      url: z.string().describe('The URL to navigate to and extract content from'),
     }),
   }),
 ]
