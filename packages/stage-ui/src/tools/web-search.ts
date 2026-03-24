@@ -8,29 +8,79 @@ const BRIDGE_SERVER_URL = 'http://localhost:3001'
 const SEARCH_TIMEOUT_MS = 20_000
 const NAVIGATE_TIMEOUT_MS = 25_000
 
+// NOTICE: LLMs often garble long/non-ASCII URLs when reproducing them in tool calls
+// (e.g., encoding the domain+path into a bogus punycode hostname). This cache stores
+// original URLs from search results so the LLM can reference them by number (e.g., "1"
+// or "[1]") instead of trying to reproduce the full URL.
+const searchResultUrlCache = new Map<number, string>()
+let nextUrlRef = 1
+
+// Known TLDs used to detect garbled punycode hostnames
+const KNOWN_TLDS = ['org', 'com', 'net', 'jp', 'io', 'dev', 'co', 'info', 'edu', 'gov', 'uk', 'de', 'fr', 'ru', 'cn', 'kr']
+
 /**
  * Normalize a URL that the LLM may have garbled.
- * Common issues:
- * - Percent-encoded characters in the domain (e.g., `%20` → space → remove)
- * - Broken punycode (`xn--` prefix with encoded spaces)
+ * Handles:
+ * - Reference numbers from search results (e.g., "[1]" → cached URL)
+ * - Percent-encoded characters in the domain
+ * - Bogus punycode hostnames (LLM merged domain+path into one label)
  * - Double-encoded characters (`%2520` → `%20` → space)
  */
-function normalizeUrl(rawUrl: string): string {
-  let url = rawUrl.trim()
+function normalizeUrl(rawUrl: unknown): string {
+  // NOTICE: LLMs sometimes pass a number (e.g., 1) instead of a string ("1")
+  // when using the reference system. Coerce to string to avoid .trim() crash.
+  let url = String(rawUrl ?? '').trim()
+
+  // Check if it's a reference to a cached search result URL (e.g., "[1]", "1")
+  const refMatch = url.match(/^\[?(\d+)\]?$/)
+  if (refMatch) {
+    const cached = searchResultUrlCache.get(Number(refMatch[1]))
+    if (cached)
+      return cached
+  }
 
   // Fix double-encoding: %25XX → %XX
   url = url.replace(/%25([0-9A-F]{2})/gi, '%$1')
 
-  // Decode percent-encoded characters in the URL so we can inspect it
   try {
     const parsed = new URL(url)
+
     // Decode hostname: percent-encoded domains are invalid
     // e.g., "wikiwiki.xn--jp%20%20aogiri..." → likely "wikiwiki.jp"
     if (parsed.hostname.includes('%')) {
       parsed.hostname = decodeURIComponent(parsed.hostname).replace(/\s+/g, '')
     }
+
     // Strip spaces from hostname (LLM sometimes injects them)
     parsed.hostname = parsed.hostname.replace(/\s+/g, '')
+
+    // NOTICE: Detect bogus punycode hostnames where the LLM merged domain + path
+    // into a single hostname label.
+    // e.g., "ja.wikipedia.xn--orgwiki-..." → "ja.wikipedia.org/wiki/..."
+    // Punycode format: xn--<asciiChars>-<encodedNonAscii>
+    // When the ASCII portion starts with a known TLD, the LLM likely concatenated
+    // the TLD + path. We reconstruct the hostname with just the TLD and recover
+    // what path info we can from the remaining ASCII characters.
+    const labels = parsed.hostname.split('.')
+    const lastLabel = labels[labels.length - 1]
+    if (lastLabel.startsWith('xn--') && labels.length >= 2) {
+      const withoutPrefix = lastLabel.slice(4) // remove "xn--"
+      const lastHyphenIdx = withoutPrefix.lastIndexOf('-')
+      if (lastHyphenIdx > 0) {
+        const asciiPart = withoutPrefix.slice(0, lastHyphenIdx).toLowerCase()
+        for (const tld of KNOWN_TLDS) {
+          if (asciiPart.startsWith(tld) && asciiPart.length > tld.length) {
+            const remainingAscii = asciiPart.slice(tld.length)
+            parsed.hostname = [...labels.slice(0, -1), tld].join('.')
+            // Recover partial path from remaining ASCII chars (non-ASCII is lost)
+            if (remainingAscii && parsed.pathname === '/') {
+              parsed.pathname = `/${remainingAscii}`
+            }
+            break
+          }
+        }
+      }
+    }
 
     return parsed.toString()
   }
@@ -63,7 +113,7 @@ async function bridgeRequest(path: string, body: Record<string, unknown>, timeou
 const tools = [
   tool({
     name: 'web_search',
-    description: 'Search the web using a browser. Returns a list of search result links. IMPORTANT: After getting search results, you MUST use web_browse to visit at least 1-3 of the top result URLs to read their actual content before answering. The search results page alone does not contain enough detail. Always search in Japanese (日本語) unless the user explicitly asks for another language.',
+    description: 'Search the web using a browser. Returns numbered search result links. IMPORTANT: After getting search results, you MUST use web_browse with the result number (e.g., "1") to visit at least 1-3 pages. Always use the number reference instead of copying the URL. Always search in Japanese (日本語) unless the user explicitly asks for another language.',
     execute: async ({ query, engine }) => {
       try {
         const result = await bridgeRequest('/api/search', { query, engine }) as Record<string, unknown>
@@ -79,14 +129,16 @@ const tools = [
         if (Array.isArray(result.searchLinks) && (result.searchLinks as Array<{ title: string, url: string }>).length > 0) {
           output += `### Top results:\n`
           for (const link of result.searchLinks as Array<{ title: string, url: string }>) {
-            output += `- ${link.title}: ${link.url}\n`
+            const ref = nextUrlRef++
+            searchResultUrlCache.set(ref, link.url)
+            output += `- [${ref}] ${link.title}: ${link.url}\n`
           }
           output += '\n'
         }
         if (result.text)
           output += `### Page content:\n${(result.text as string).slice(0, 3000)}\n`
 
-        output += '\n---\nIMPORTANT: You MUST now use web_browse to visit at least 1-3 of the URLs listed above to read their full content. The search results page only shows titles and snippets — you need the actual page content to give a good answer. Do NOT answer based on search results alone.'
+        output += '\n---\nIMPORTANT: You MUST now use web_browse to visit at least 1-3 of the results above. Use the reference NUMBER (e.g., url: "1") instead of copying the URL — this avoids URL encoding errors. Do NOT answer based on search results alone.'
         return output
       }
       catch (error) {
@@ -104,7 +156,7 @@ const tools = [
   }),
   tool({
     name: 'web_browse',
-    description: 'Navigate to a specific URL and extract its full text content. You SHOULD use this after web_search to read the actual pages from search results. Also use to visit any known URL. Call this multiple times to read several pages for thorough research.',
+    description: 'Navigate to a URL and extract its text content. PREFERRED: Pass the reference number from web_search results (e.g., url: "1") to avoid URL encoding errors. Also accepts a full URL. Call this multiple times to read several pages for thorough research.',
     execute: async ({ url: rawUrl }) => {
       const url = normalizeUrl(rawUrl)
       try {
@@ -132,7 +184,7 @@ const tools = [
       }
     },
     parameters: z.object({
-      url: z.string().describe('The URL to navigate to and extract content from'),
+      url: z.string().describe('A reference number from search results (e.g., "1" or "[1]") or a full URL to navigate to'),
     }),
   }),
 ]
