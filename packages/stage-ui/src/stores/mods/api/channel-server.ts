@@ -49,12 +49,27 @@ export const useModsServerChannelStore = defineStore('mods:channels:proj-airi:se
       ...(options?.possibleEvents ?? []),
     ]))
 
+    // NOTICE: Track whether the first connection error has been logged to avoid spamming
+    // the console on every reconnect attempt. The Client internally handles reconnection
+    // with exponential backoff — we only need to log the initial failure.
+    let errorLogged = false
+
+    // NOTICE: Resolve the initializing promise immediately so that app startup
+    // (onMounted in App.vue) is not blocked by WebSocket reconnect attempts.
+    // The Client connects in the background; when it succeeds, connected.value
+    // flips to true and queued messages are flushed. When it fails (e.g.,
+    // maxReconnectAttempts exhausted), the app simply works without the server.
     initializing.value = new Promise<void>((resolve) => {
       client.value = new Client({
         name: isStageWeb() ? WebSocketEventSource.StageWeb : isStageTamagotchi() ? WebSocketEventSource.StageTamagotchi : WebSocketEventSource.StageWeb,
         url: websocketUrl.value || defaultWebSocketUrl,
         token: options?.token,
         possibleEvents,
+        // NOTICE: Limit reconnect attempts to 3. Without a running server,
+        // infinite retries spam the browser console with network-level
+        // "WebSocket connection failed" errors that cannot be suppressed.
+        // Backoff: 1s → 2s → 4s, then stops. Users can retry via UI or page reload.
+        maxReconnectAttempts: 3,
         onAnyMessage: (event) => {
           useWebSocketInspectorStore().add('incoming', event)
         },
@@ -63,26 +78,33 @@ export const useModsServerChannelStore = defineStore('mods:channels:proj-airi:se
         },
         onError: (error) => {
           connected.value = false
-          initializing.value = null
-          clearListeners()
 
-          console.warn('WebSocket server connection error:', error)
+          if (!errorLogged) {
+            errorLogged = true
+            console.warn('WebSocket server connection error:', error)
+          }
         },
         onClose: () => {
           connected.value = false
-          initializing.value = null
-          clearListeners()
 
-          console.warn('WebSocket server connection closed')
+          if (!errorLogged) {
+            errorLogged = true
+            console.warn('WebSocket server connection closed')
+          }
+        },
+        onStateChange: ({ status }) => {
+          if (status === 'failed') {
+            initializing.value = null
+          }
         },
       })
 
       client.value.onEvent('module:authenticated', (event) => {
         if (event.data.authenticated) {
           connected.value = true
+          errorLogged = false
           flush()
           initializeListeners()
-          resolve()
 
           // eslint-disable-next-line no-console
           console.log('WebSocket server connection established and authenticated')
@@ -92,6 +114,11 @@ export const useModsServerChannelStore = defineStore('mods:channels:proj-airi:se
 
         connected.value = false
       })
+
+      // Resolve immediately — connection proceeds in the background.
+      // The app functions without the server; connected.value will flip
+      // to true asynchronously when authentication succeeds.
+      resolve()
     })
   }
 

@@ -57,7 +57,7 @@ export const providerLmStudio = defineProvider<LMStudioConfig>({
       skipApiKeyCheck: true,
       schedule: {
         mode: 'interval',
-        intervalMs: 15_000,
+        intervalMs: 120_000,
       },
       connectivityFailureReason: ({ errorMessage }) =>
         `Failed to reach LM Studio server, error: ${errorMessage} occurred.\n\nMake sure LM Studio is running and the local server is started. You can start the local server in LM Studio by going to the 'Local Server' tab and clicking 'Start Server'.\n\nIf the LM Studio instance is already running, this is likely a CORS (Cross-Origin Resource Sharing) issue. You need to enable CORS in LM Studio: go to 'Local Server' tab and check 'Enable CORS' option in the Server Settings.`,

@@ -48,6 +48,30 @@ function sanitizeMessages(messages: unknown[]): Message[] {
   })
 }
 
+/**
+ * Checks whether the model's text output is empty or consists entirely of
+ * thinking/reasoning tags (e.g., `<think>...</think>`), which get filtered
+ * out by the response categorizer, leaving the user with no visible response.
+ */
+function isEmptyOrThinkingOnlyOutput(text: string): boolean {
+  const trimmed = text.trim()
+  if (trimmed.length < 5)
+    return true
+
+  let stripped = trimmed
+    // Remove properly closed thinking tags
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '')
+    // Also handle unclosed thinking tags at the end (model stopped mid-thought)
+    .replace(/<think>[\s\S]*$/gi, '')
+    .replace(/<thought>[\s\S]*$/gi, '')
+    .replace(/<reasoning>[\s\S]*$/gi, '')
+
+  stripped = stripped.trim()
+  return stripped.length < 5
+}
+
 function streamOptionsToolsCompatibilityOk(model: string, chatProvider: ChatProvider, _: Message[], options?: StreamOptions): boolean {
   // NOTICE: For local providers (LM Studio, Ollama), always enable tools since they handle
   // function calling at the API level regardless of model capability.
@@ -83,54 +107,126 @@ async function streamFrom(model: string, chatProvider: ChatProvider, messages: M
       ]
     : undefined
 
-  return new Promise<void>((resolve, reject) => {
-    let settled = false
-    const resolveOnce = () => {
-      if (settled)
-        return
-      settled = true
-      resolve()
-    }
-    const rejectOnce = (err: unknown) => {
-      if (settled)
-        return
-      settled = true
-      reject(err)
-    }
+  // Track tool usage and final step text for auto-continuation detection
+  let hadToolCalls = false
+  let finalStepText = ''
 
-    const onEvent = async (event: unknown) => {
-      try {
-        await options?.onStreamEvent?.(event as StreamEvent)
-        if (event && (event as StreamEvent).type === 'finish') {
-          const finishReason = (event as any).finishReason
-          if (finishReason !== 'tool_calls' || !options?.waitForTools)
+  const trackingStreamEvent = async (event: StreamEvent) => {
+    if (event.type === 'tool-call')
+      hadToolCalls = true
+    if (event.type === 'text-delta')
+      finalStepText += event.text
+    // Reset text tracking when a tool-call step finishes (another step follows)
+    if (event.type === 'finish' && (event as any).finishReason === 'tool_calls')
+      finalStepText = ''
+
+    await options?.onStreamEvent?.(event)
+  }
+
+  // Reusable stream runner wrapping streamText in a promise
+  const MAX_STEPS = 5
+  const runStream = (msgs: Message[], streamTools: Tool[] | undefined, waitForTools: boolean) => {
+    return new Promise<void>((resolve, reject) => {
+      let settled = false
+      // NOTICE: Track tool-call finish events to detect when maxSteps is exhausted.
+      // When the model's last step is a tool call and maxSteps is reached, xsai emits
+      // a finish event with finishReason: 'tool_calls' but no more events follow.
+      // Without this counter, waitForTools keeps the Promise hanging forever.
+      let toolCallFinishCount = 0
+
+      // Safety timeout: if the stream hangs for any reason (network, xsai bug, etc.),
+      // resolve after 3 minutes so the chat turn isn't stuck indefinitely.
+      let safetyTimer: ReturnType<typeof setTimeout> | undefined
+
+      const resolveOnce = () => {
+        if (settled)
+          return
+        settled = true
+        clearTimeout(safetyTimer)
+        resolve()
+      }
+      const rejectOnce = (err: unknown) => {
+        if (settled)
+          return
+        settled = true
+        clearTimeout(safetyTimer)
+        reject(err)
+      }
+
+      safetyTimer = setTimeout(() => {
+        console.warn('[llm] Stream safety timeout reached (180s) — resolving to unblock chat')
+        resolveOnce()
+      }, 180_000)
+
+      const onEvent = async (event: unknown) => {
+        try {
+          await trackingStreamEvent(event as StreamEvent)
+          if (event && (event as StreamEvent).type === 'finish') {
+            const finishReason = (event as any).finishReason
+            if (finishReason === 'tool_calls') {
+              toolCallFinishCount++
+              // When maxSteps is exhausted, the stream is done even though the model
+              // wanted more tool calls. Resolve to unblock the chat turn.
+              if (toolCallFinishCount >= MAX_STEPS) {
+                resolveOnce()
+                return
+              }
+              // If waitForTools, keep waiting for a non-tool finish (more steps to come)
+              if (waitForTools)
+                return
+            }
             resolveOnce()
+          }
+          else if (event && (event as StreamEvent).type === 'error') {
+            const error = (event as any).error ?? new Error('Stream error')
+            rejectOnce(error)
+          }
         }
-        else if (event && (event as StreamEvent).type === 'error') {
-          const error = (event as any).error ?? new Error('Stream error')
-          rejectOnce(error)
+        catch (err) {
+          rejectOnce(err)
         }
+      }
+
+      try {
+        streamText({
+          ...chatConfig,
+          maxSteps: MAX_STEPS,
+          messages: msgs,
+          headers,
+          // TODO: we need Automatic tools discovery
+          tools: streamTools,
+          onEvent,
+        })
       }
       catch (err) {
         rejectOnce(err)
       }
-    }
+    })
+  }
 
-    try {
-      streamText({
-        ...chatConfig,
-        maxSteps: 10,
-        messages: sanitized,
-        headers,
-        // TODO: we need Automatic tools discovery
-        tools,
-        onEvent,
-      })
-    }
-    catch (err) {
-      rejectOnce(err)
-    }
-  })
+  await runStream(sanitized, tools, options?.waitForTools ?? false)
+
+  // NOTICE: Auto-continuation for models that produce empty or thinking-only output.
+  // Small models (e.g., qwen3.5-9b) often wrap their entire answer in <think> tags,
+  // which get filtered by the response categorizer, leaving the user with no visible speech.
+  // When this happens, we nudge the model once to produce a direct answer.
+  if (isEmptyOrThinkingOnlyOutput(finalStepText)) {
+    finalStepText = ''
+
+    const nudge = hadToolCalls
+      ? 'Based on the information you gathered from the tools, please provide your answer directly to the user. Do not use any tools. Do not wrap your response in <think> tags. Respond naturally in the same language the user used.'
+      : 'Please provide your answer directly to the user. Do not wrap your response in <think> tags. Respond naturally in the same language the user used.'
+
+    sanitized.push({ role: 'user', content: nudge } as Message)
+
+    // Disable tools when tool calls already happened to prevent infinite loops;
+    // keep tools available otherwise (model may need them on the retry).
+    await runStream(
+      sanitized,
+      hadToolCalls ? undefined : tools,
+      hadToolCalls ? false : (options?.waitForTools ?? false),
+    )
+  }
 }
 
 export async function attemptForToolsCompatibilityDiscovery(model: string, chatProvider: ChatProvider, _: Message[], options?: Omit<StreamOptions, 'supportsTools'>): Promise<boolean> {

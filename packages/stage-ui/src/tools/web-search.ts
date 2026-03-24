@@ -3,15 +3,21 @@ import { z } from 'zod'
 
 const BRIDGE_SERVER_URL = 'http://localhost:3001'
 
+// NOTICE: 65s was far too long — the LLM tool loop blocks waiting for tool execution,
+// so a slow/dead bridge server would freeze the entire chat turn.
+const SEARCH_TIMEOUT_MS = 20_000
+const NAVIGATE_TIMEOUT_MS = 25_000
+
 /**
  * browser-bridge サーバーにリクエストを送信するヘルパー
  */
-async function bridgeRequest(path: string, body: Record<string, unknown>): Promise<unknown> {
+async function bridgeRequest(path: string, body: Record<string, unknown>, timeoutMs?: number): Promise<unknown> {
+  const timeout = timeoutMs ?? SEARCH_TIMEOUT_MS
   const res = await fetch(`${BRIDGE_SERVER_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(65000),
+    signal: AbortSignal.timeout(timeout),
   })
 
   if (!res.ok) {
@@ -25,7 +31,7 @@ async function bridgeRequest(path: string, body: Record<string, unknown>): Promi
 const tools = [
   tool({
     name: 'web_search',
-    description: 'Search the web using a browser. Use this when you need to look up current information, find facts, or research topics you are unsure about. Returns search results with titles, URLs, and page text. Always search in Japanese (日本語) unless the user explicitly asks for another language.',
+    description: 'Search the web using a browser. Returns a list of search result links. IMPORTANT: After getting search results, you MUST use web_browse to visit at least 1-3 of the top result URLs to read their actual content before answering. The search results page alone does not contain enough detail. Always search in Japanese (日本語) unless the user explicitly asks for another language.',
     execute: async ({ query, engine }) => {
       try {
         const result = await bridgeRequest('/api/search', { query, engine }) as Record<string, unknown>
@@ -48,7 +54,7 @@ const tools = [
         if (result.text)
           output += `### Page content:\n${(result.text as string).slice(0, 3000)}\n`
 
-        output += '\n---\nIf this information is sufficient to answer the user\'s question, summarize and respond in the same language the user used. If not, browse specific result URLs with web_browse to gather more details.'
+        output += '\n---\nIMPORTANT: You MUST now use web_browse to visit at least 1-3 of the URLs listed above to read their full content. The search results page only shows titles and snippets — you need the actual page content to give a good answer. Do NOT answer based on search results alone.'
         return output
       }
       catch (error) {
@@ -66,10 +72,10 @@ const tools = [
   }),
   tool({
     name: 'web_browse',
-    description: 'Navigate to a specific URL and extract its content. Use this to read a webpage after finding it via web_search, or to visit a known URL.',
+    description: 'Navigate to a specific URL and extract its full text content. You SHOULD use this after web_search to read the actual pages from search results. Also use to visit any known URL. Call this multiple times to read several pages for thorough research.',
     execute: async ({ url }) => {
       try {
-        const result = await bridgeRequest('/api/navigate', { url }) as Record<string, unknown>
+        const result = await bridgeRequest('/api/navigate', { url }, NAVIGATE_TIMEOUT_MS) as Record<string, unknown>
         if (result.error) {
           return `Browse failed: ${result.error}`
         }

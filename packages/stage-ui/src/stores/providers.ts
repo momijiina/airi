@@ -21,7 +21,7 @@ import type {
 import type { AliyunRealtimeSpeechExtraOptions } from './providers/aliyun/stream-transcription'
 
 import { isStageTamagotchi, isUrl } from '@proj-airi/stage-shared'
-import { computedAsync, useIntervalFn, useLocalStorage } from '@vueuse/core'
+import { computedAsync, useIntervalFn, useLocalStorage, watchDebounced } from '@vueuse/core'
 import {
   createOpenAI,
 } from '@xsai-ext/providers/create'
@@ -44,7 +44,7 @@ import {
   createUnVolcengine,
   listVoices,
 } from 'unspeech'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { listProviders as listDefinedProviders } from '../libs/providers'
@@ -1850,6 +1850,10 @@ export const useProvidersStore = defineStore('providers', () => {
   // Initialize all providers
   Object.keys(providerMetadata).forEach(initializeProvider)
 
+  // NOTICE: Track consecutive failures per provider to apply exponential backoff.
+  // Prevents spamming ERR_CONNECTION_REFUSED when a provider (e.g., Ollama) is not running.
+  const providerValidationFailureCount = new Map<string, number>()
+
   function startPeriodicRuntimeValidation() {
     for (const [providerId, intervalMs] of providerValidationIntervalMsById.entries()) {
       if (!providerMetadata[providerId] || intervalMs <= 0)
@@ -1859,19 +1863,48 @@ export const useProvidersStore = defineStore('providers', () => {
         continue
       }
 
-      const loop = useIntervalFn(() => {
-        void validateProvider(providerId, { force: true })
+      const loop = useIntervalFn(async () => {
+        // NOTICE: Skip periodic validation for providers the user hasn't added or configured.
+        // Auto-detect providers (browser-web-speech-api, player2) are always validated.
+        // This prevents spamming ERR_CONNECTION_REFUSED for unused providers like Ollama.
+        const AUTO_DETECT_PROVIDERS = ['browser-web-speech-api', 'player2']
+        if (!shouldListProvider(providerId) && !AUTO_DETECT_PROVIDERS.includes(providerId))
+          return
+
+        const failures = providerValidationFailureCount.get(providerId) ?? 0
+        // Exponential backoff: skip validation cycles when the provider keeps failing.
+        // After 1 failure wait 1 cycle, 2 failures wait 3 cycles, 3+ wait 7 cycles, etc.
+        // This drastically reduces console noise for offline providers.
+        if (failures > 0) {
+          const skipCycles = Math.min(2 ** failures - 1, 20)
+          const counter = (providerValidationFailureCount.get(`${providerId}:counter`) ?? 0) + 1
+          providerValidationFailureCount.set(`${providerId}:counter`, counter)
+          if (counter < skipCycles)
+            return
+          providerValidationFailureCount.set(`${providerId}:counter`, 0)
+        }
+
+        const wasValid = providerRuntimeState.value[providerId]?.isConfigured ?? false
+        await validateProvider(providerId, { force: true })
+        const isValid = providerRuntimeState.value[providerId]?.isConfigured ?? false
+
+        if (isValid) {
+          providerValidationFailureCount.set(providerId, 0)
+        }
+        else if (!wasValid && !isValid) {
+          providerValidationFailureCount.set(providerId, Math.min(failures + 1, 6))
+        }
       }, intervalMs, { immediate: false, immediateCallback: false })
       loop.resume()
       providerRevalidationLoops.set(providerId, loop)
     }
   }
 
-  // Update configuration status for all configured providers
+  // Update configuration status for added/configured providers + auto-detect providers
+  const AUTO_DETECT_PROVIDERS = new Set(['browser-web-speech-api', 'player2'])
   async function updateConfigurationStatus() {
     await Promise.all(Object.entries(providerMetadata)
-      // TODO: ignore un-configured provider
-      // .filter(([_, provider]) => provider.configured)
+      .filter(([providerId]) => shouldListProvider(providerId) || AUTO_DETECT_PROVIDERS.has(providerId))
       .map(async ([providerId]) => {
         try {
           if (providerRuntimeState.value[providerId]) {
@@ -1887,8 +1920,9 @@ export const useProvidersStore = defineStore('providers', () => {
       }))
   }
 
-  // Call initially and watch for changes
-  watch(providerCredentials, updateConfigurationStatus, { deep: true, immediate: true })
+  // Call initially and watch for changes (debounced to avoid rapid-fire revalidation
+  // when multiple credential fields change in quick succession)
+  watchDebounced(providerCredentials, updateConfigurationStatus, { deep: true, immediate: true, debounce: 2000 })
   startPeriodicRuntimeValidation()
 
   // Available providers (only those that are properly configured)
@@ -2018,8 +2052,9 @@ export const useProvidersStore = defineStore('providers', () => {
   }
   const previousCredentialHashes = ref<Record<string, string>>({})
 
-  // Watch for credential changes and refetch models accordingly
-  watch(providerCredentials, (newCreds) => {
+  // Watch for credential changes and refetch models accordingly (debounced to
+  // avoid redundant /v1/models calls when editing multiple config fields)
+  watchDebounced(providerCredentials, (newCreds) => {
     const changedProviders: string[] = []
 
     for (const providerId in newCreds) {
@@ -2042,7 +2077,7 @@ export const useProvidersStore = defineStore('providers', () => {
         fetchModelsForProvider(providerId)
       }
     }
-  }, { deep: true, immediate: true })
+  }, { deep: true, immediate: true, debounce: 2000 })
 
   // Function to get localized provider metadata
   function getProviderMetadata(providerId: string) {

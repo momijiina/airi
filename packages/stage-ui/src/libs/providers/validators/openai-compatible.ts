@@ -248,8 +248,12 @@ export function createOpenAICompatibleValidators<TConfig extends { apiKey?: stri
         const timeout = setTimeout(() => controller.abort(), 10_000)
 
         try {
+          // NOTICE: Use HEAD instead of GET to avoid fetching the full model list.
+          // The model_list validator already does a full GET; this check only needs
+          // to confirm the server is reachable, reducing duplicate /v1/models traffic
+          // that can slow down local LLM inference (e.g., LM Studio).
           const response = await fetch(modelsUrl, {
-            method: 'GET',
+            method: 'HEAD',
             headers: {
               ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
               ...additionalHeaders,

@@ -330,6 +330,24 @@ export const useChatOrchestratorStore = defineStore('chat-orchestrator', () => {
 
       await parser.end()
 
+      // NOTICE: Fallback for empty speech content after tool use.
+      // If the model only generated reasoning (all inside <think> tags) and no visible speech,
+      // use the reasoning content as the visible response so the user sees something.
+      if (buildingMessage.content.trim().length === 0
+        && buildingMessage.categorization?.reasoning
+        && buildingMessage.categorization.reasoning.trim().length > 0) {
+        const reasoning = buildingMessage.categorization.reasoning.trim()
+        buildingMessage.content = reasoning
+        const lastSlice = buildingMessage.slices.at(-1)
+        if (lastSlice?.type === 'text') {
+          lastSlice.text += reasoning
+        }
+        else {
+          buildingMessage.slices.push({ type: 'text', text: reasoning })
+        }
+        updateUI()
+      }
+
       if (!isStaleGeneration() && buildingMessage.slices.length > 0) {
         sessionMessagesForSend.push(toRaw(buildingMessage))
         chatSession.persistSessionMessages(sessionId)

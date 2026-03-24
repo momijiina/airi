@@ -164,7 +164,10 @@ export class Client<C = undefined> {
     this.heartbeat = heartbeat
 
     if (this.opts.autoConnect) {
-      void this.connect()
+      // NOTICE: Catch rejection to prevent Uncaught (in promise) errors when
+      // maxReconnectAttempts is exhausted. The error is already surfaced
+      // via onError/onStateChange callbacks — no need to propagate it.
+      this.connect().catch(() => {})
     }
   }
 
@@ -404,7 +407,7 @@ export class Client<C = undefined> {
 
       if (wasReady && this.opts.autoReconnect) {
         this.pendingReconnect = true
-        void this.connect()
+        this.connect().catch(() => {})
         return
       }
 
@@ -822,6 +825,6 @@ export class Client<C = undefined> {
       return
     }
 
-    void this.connect()
+    this.connect().catch(() => {})
   }
 }

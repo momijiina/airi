@@ -64,7 +64,7 @@ export function getProviderValidationIntervalMs(options: {
   defaultIntervalMs?: number
 }) {
   const validators = (options.definition.validators?.validateProvider || []).map(creator => creator(options.contextOptions))
-  const defaultIntervalMs = options.defaultIntervalMs ?? 15_000
+  const defaultIntervalMs = options.defaultIntervalMs ?? 60_000
   const intervals = validators
     .filter(validator => validator.schedule?.mode === 'interval')
     .map(validator => validator.schedule?.intervalMs || defaultIntervalMs)
